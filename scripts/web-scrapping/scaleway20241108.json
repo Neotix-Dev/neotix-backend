@@ -1,0 +1,68 @@
+[
+  {
+    "name": "2x NVIDIA H100 Tensor Core GPU",
+    "gpu_memory": "80GB",
+    "peak_fp16_perf": "3,026 TFLOPS",
+    "hourly_price": "\u20ac5.04/HOUR"
+  },
+  {
+    "name": "1x NVIDIA H100 Tensor Core GPU",
+    "gpu_memory": "80GB",
+    "peak_fp16_perf": "1,513 TFLOPS",
+    "hourly_price": "\u20ac2.52/HOUR"
+  },
+  {
+    "name": "8x NVIDIA L40S GPU",
+    "gpu_memory": "48GB",
+    "peak_fp16_perf": "2,896 TFLOPS",
+    "hourly_price": "\u20ac11.2/HOUR"
+  },
+  {
+    "name": "4x NVIDIA L40S GPU",
+    "gpu_memory": "48GB",
+    "peak_fp16_perf": "1,448 TFLOPS",
+    "hourly_price": "\u20ac5.6/HOUR"
+  },
+  {
+    "name": "2x NVIDIA L40S GPU",
+    "gpu_memory": "48GB",
+    "peak_fp16_perf": "724 TFLOPS",
+    "hourly_price": "\u20ac2.8/HOUR"
+  },
+  {
+    "name": "1x NVIDIA L40S GPU",
+    "gpu_memory": "48GB",
+    "peak_fp16_perf": "362 TFLOPS",
+    "hourly_price": "\u20ac1.4/HOUR"
+  },
+  {
+    "name": "8x NVIDIA L4 Tensor Core GPU",
+    "gpu_memory": "24GB",
+    "peak_fp16_perf": "1,936 TFLOPS",
+    "hourly_price": "\u20ac6.00/HOUR"
+  },
+  {
+    "name": "4x NVIDIA L4 Tensor Core GPU",
+    "gpu_memory": "24GB",
+    "peak_fp16_perf": "968 TFLOPS",
+    "hourly_price": "\u20ac3.00/HOUR"
+  },
+  {
+    "name": "2x NVIDIA L4 Tensor Core GPU",
+    "gpu_memory": "24GB",
+    "peak_fp16_perf": "484 TFLOPS",
+    "hourly_price": "\u20ac1.50/HOUR"
+  },
+  {
+    "name": "1x NVIDIA L4 Tensor Core GPU",
+    "gpu_memory": "24GB",
+    "peak_fp16_perf": "242 TFLOPS",
+    "hourly_price": "\u20ac0.75/HOUR"
+  },
+  {
+    "name": "NVIDIA P100",
+    "gpu_memory": "16GB",
+    "peak_fp16_perf": "19 TFLOPS",
+    "hourly_price": "\u20ac1.24/HOUR"
+  }
+]

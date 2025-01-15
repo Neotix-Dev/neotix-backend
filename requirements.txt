@@ -1,0 +1,32 @@
+# Web Framework
+Flask>=2.0.0
+flask-cors>=4.0.0
+flask-sqlalchemy>=3.0.0
+gunicorn>=21.2.0
+
+# Database
+SQLAlchemy>=2.0.0
+psycopg2-binary==2.9.9
+SQLAlchemy-Utils==0.41.1
+
+# Vector Database
+qdrant-client>=1.6.0
+
+# Machine Learning & Embeddings
+sentence-transformers>=2.2.0
+torch>=2.0.0
+
+# Development Tools
+python-dotenv>=1.0.0
+tqdm>=4.65.0
+
+# Testing & Debugging
+pytest>=7.0.0
+pytest-cov>=4.1.0
+
+# Utilities
+numpy>=1.24.0
+pandas>=2.0.0
+requests>=2.31.0
+openai>=1.0.0
+firebase-admin==6.2.0

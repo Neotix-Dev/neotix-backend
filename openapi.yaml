@@ -1,0 +1,93 @@
+openapi: 3.0.0
+info:
+  title: Startup Backend API
+  version: 1.0.0
+  description: API documentation for the Startup backend services
+
+servers:
+  - url: http://localhost:5000/api
+    description: Development server
+
+paths:
+  /user/register:
+    post:
+      summary: Register a new user
+      tags:
+        - User Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+              properties:
+                username:
+                  type: string
+                  example: johndoe
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+                password:
+                  type: string
+                  format: password
+                  example: securepass123
+      responses:
+        '201':
+          description: User created successfully
+        '400':
+          description: Invalid request data
+        '409':
+          description: Username or email already exists
+        '500':
+          description: Server error
+
+  /user/login:
+    post:
+      summary: Authenticate user and get token
+      tags:
+        - User Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: johndoe
+                password:
+                  type: string
+                  format: password
+                  example: securepass123
+      responses:
+        '200':
+          description: Successfully authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Invalid credentials
+        '400':
+          description: Invalid request data
+        '500':
+          description: Server error
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

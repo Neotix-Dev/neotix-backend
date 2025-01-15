@@ -1,0 +1,682 @@
+[
+  {
+    "server_id": "112",
+    "title": "2xH100, 2x80GB GPU, 2x6226R, 384GB RAM",
+    "monthly_price_eur": 4854.6,
+    "detailed_prices": {
+      "monthly": "€ 4854.6 / month",
+      "weekly": "€ 1618.12 / week",
+      "daily": "€ 323.62 / day\n              \n                 *",
+      "per_minute": "€ 0.35 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "160GB (2x80GB) HBM2e",
+      "cpu": "2x Intel® Xeon® Gold 6226R Processor 16C/32 3.9 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/112"
+  },
+  {
+    "server_id": "114",
+    "title": "8x3090, 8x24GB GPU, 2x6226R, 384GB RAM, NVLink",
+    "monthly_price_eur": 3100.0,
+    "detailed_prices": {
+      "monthly": "€ 3100.0 / month",
+      "weekly": "€ 857.06 / week",
+      "daily": "€ 171.41 / day\n              \n                 *",
+      "per_minute": "€ 0.18 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "192GB (8x24GB) GDDR6X",
+      "cpu": "2x Intel® Xeon® Gold 6226R Processor 16C/32 3.9 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/114"
+  },
+  {
+    "server_id": "116",
+    "title": "8xA6000, 8x48GB GPU, 2x6248R, 384GB RAM, NVLlink",
+    "monthly_price_eur": 4786.0,
+    "detailed_prices": {
+      "monthly": "€ 4786.0 / month",
+      "weekly": "€ 1196.5 / week",
+      "daily": "€ 239.3 / day\n              \n                 *",
+      "per_minute": "€ 0.24 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "384GB (8x48GB) GDDR6X",
+      "cpu": "2 x Intel® Xeon® Gold 6248R Processor 24C/48, 4.00 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/116"
+  },
+  {
+    "server_id": "128",
+    "title": "8x3090, 8x24GB GPU, 2x6226R, 384GB RAM",
+    "monthly_price_eur": 2950.0,
+    "detailed_prices": {
+      "monthly": "€ 2950.0 / month",
+      "weekly": "€ 827.06 / week",
+      "daily": "€ 166.41 / day\n              \n                 *",
+      "per_minute": "€ 0.18 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "192GB (8x24GB) GDDR6X",
+      "cpu": "2x Intel® Xeon® Gold 6226R Processor 16C/32 3.9 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/128"
+  },
+  {
+    "server_id": "129",
+    "title": "8xA6000, 8x48GB GPU, 2x6248R, 384GB RAM",
+    "monthly_price_eur": 4626.0,
+    "detailed_prices": {
+      "monthly": "€ 4626.0 / month",
+      "weekly": "€ 1156.5 / week",
+      "daily": "€ 235.0 / day\n              \n                 *",
+      "per_minute": "€ 0.24 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "384GB (8x48GB) GDDR6X",
+      "cpu": "2 x Intel® Xeon® Gold 6248R Processor 24C/48, 4.00 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/129"
+  },
+  {
+    "server_id": "141",
+    "title": "8xL40S, 8x48GB GPU, 2x6248R, 384GB RAM",
+    "monthly_price_eur": 8970.78,
+    "detailed_prices": {
+      "monthly": "€ 8970.78 / month",
+      "weekly": "€ 2242.7 / week",
+      "daily": "€ 448.54 / day\n              \n                 *",
+      "per_minute": "€ 0.55 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "384GB (8x48GB) GDDR6X with ECC",
+      "cpu": "2x Intel® Xeon® Gold 6248R Processor 24C/48 4.0 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/141"
+  },
+  {
+    "server_id": "134",
+    "title": "8xL20, 8x48GB GPU, 2x6226R, 384GB RAM",
+    "monthly_price_eur": 4394.7,
+    "detailed_prices": {
+      "monthly": "€ 4394.7 / month",
+      "weekly": "€ 1098.68 / week",
+      "daily": "€ 219.74 / day\n              \n                 *",
+      "per_minute": "€ 0.2 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "384GB (8x48GB) GDDR6X with ECC",
+      "cpu": "2x Intel® Xeon® Gold 6226R Processor 16C/32 3.9 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/134"
+  },
+  {
+    "server_id": "140",
+    "title": "8 x A6000, 384 GB RAM, 2 x Xeon Gold 6248R, 15TB NVMe",
+    "monthly_price_eur": 4826.0,
+    "detailed_prices": {
+      "monthly": "€ 4826.0 / month",
+      "weekly": "€ 1206.5 / week",
+      "daily": "€ 241.3 / day\n              \n                 *",
+      "per_minute": "€ 0.25 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "384GB (8x48GB) GDDR6X",
+      "cpu": "2x Intel® Xeon® Gold 6248R Processor 24C/48 4.0 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "15000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/140"
+  },
+  {
+    "server_id": "138",
+    "title": "8x3090, 8x24GB GPU, 2x6250, 384GB RAM, NVLink",
+    "monthly_price_eur": 3470.0,
+    "detailed_prices": {
+      "monthly": "€ 3470.0 / month",
+      "weekly": "€ 867.5 / week",
+      "daily": "€ 173.5 / day\n              \n                 *",
+      "per_minute": "€ 0.18 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "192GB (8x24GB) GDDR6X",
+      "cpu": "2x Intel® Xeon® Gold 6250 Processor (35.75M Cache, Max 4.50 GHz)",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/138"
+  },
+  {
+    "server_id": "139",
+    "title": "8xA6000, 8x48GB GPU, 2x6250, 384GB RAM",
+    "monthly_price_eur": 4796.0,
+    "detailed_prices": {
+      "monthly": "€ 4796.0 / month",
+      "weekly": "€ 1199.0 / week",
+      "daily": "€ 239.8 / day\n              \n                 *",
+      "per_minute": "€ 0.27 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "384GB (8x48GB) GDDR6X",
+      "cpu": "2 x Intel® Xeon® Gold 6250 Processor 8C/16, 4.50 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/139"
+  },
+  {
+    "server_id": "110",
+    "title": "6x3090, 6x24GB GPU, 2x6226R, 384GB RAM, NVLink",
+    "monthly_price_eur": 2900.0,
+    "detailed_prices": {
+      "monthly": "€ 2900.0 / month",
+      "weekly": "€ 739.56 / week",
+      "daily": "€ 147.91 / day\n              \n                 *",
+      "per_minute": "€ 0.14 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "144 GB (6x24GB) GDDR6X",
+      "cpu": "2x Intel® Xeon® Gold 6226R Processor 16C/32 3.9 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/110"
+  },
+  {
+    "server_id": "111",
+    "title": "4x4090, 4x24GB GPU, 2x6226R, 384GB RAM",
+    "monthly_price_eur": 3220.0,
+    "detailed_prices": {
+      "monthly": "€ 3220.0 / month",
+      "weekly": "€ 805.0 / week",
+      "daily": "€ 161.0 / day\n              \n                 *",
+      "per_minute": "€ 0.16 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "96GB (4x24GB) GDDR6X",
+      "cpu": "2x Intel® Xeon® Gold 6226R Processor 16C/32 3.9 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/111"
+  },
+  {
+    "server_id": "136",
+    "title": "8x3090, 8x24GB GPU, 2x6248R, 384GB RAM, NVLink",
+    "monthly_price_eur": 3300.0,
+    "detailed_prices": {
+      "monthly": "€ 3300.0 / month",
+      "weekly": "€ 825.0 / week",
+      "daily": "€ 165.0 / day\n              \n                 *",
+      "per_minute": "€ 0.19 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "192GB (8x24GB) GDDR6X",
+      "cpu": "2 x Intel® Xeon® Gold 6248R Processor 24C/48, 4.00 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/136"
+  },
+  {
+    "server_id": "100",
+    "title": "8xA6000, 8x48GB GPU, 2x6226R, 384GB RAM",
+    "monthly_price_eur": 4386.02,
+    "detailed_prices": {
+      "monthly": "€ 4386.02 / month",
+      "weekly": "€ 1096.51 / week",
+      "daily": "€ 219.3 / day\n              \n                 *",
+      "per_minute": "€ 0.23 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "384GB (8x48GB) GDDR6X",
+      "cpu": "2x Intel® Xeon® Gold 6226R Processor 16C/32 3.9 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/100"
+  },
+  {
+    "server_id": "113",
+    "title": "8xRTX 6000 Ada, 8x48GB GPU, 2x6226R, 384GB RAM",
+    "monthly_price_eur": 5265.2,
+    "detailed_prices": {
+      "monthly": "€ 5265.2 / month",
+      "weekly": "€ 1316.3 / week",
+      "daily": "€ 263.26 / day\n              \n                 *",
+      "per_minute": "€ 0.23 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "384GB (8x48GB) GDDR6X with ECC",
+      "cpu": "2x Intel® Xeon® Gold 6226R Processor 16C/32 3.9 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/113"
+  },
+  {
+    "server_id": "122",
+    "title": "4xA6000, 4x48GB GPU, 2xE5-2690v4, 256GB RAM, 960GB SSD, 2TB SSD",
+    "monthly_price_eur": 2193.0,
+    "detailed_prices": {
+      "monthly": "€ 2193.0 / month",
+      "weekly": "€ 548.25 / week",
+      "daily": "€ 109.65 / day\n              \n                 *",
+      "per_minute": "€ 0.13 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "192GB (4x48GB) GDDR6X",
+      "cpu": "2 x Intel® Xeon® E5-2690v4 3.5 GHz",
+      "ram": "256 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/122"
+  },
+  {
+    "server_id": "119",
+    "title": "4x3090, 4x24GB GPU, 2xE5-2690v4, 256GB RAM, 2TB SSD",
+    "monthly_price_eur": 2050.28,
+    "detailed_prices": {
+      "monthly": "€ 2050.28 / month",
+      "weekly": "€ 512.57 / week",
+      "daily": "€ 102.51 / day\n              \n                 *",
+      "per_minute": "€ 0.11 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "96GB (4x24GB) GDDR6X",
+      "cpu": "2 x Intel® Xeon® E5-2690v4 2.60 GHz",
+      "ram": "256 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/119"
+  },
+  {
+    "server_id": "59",
+    "title": "2 x P100 PCI, 2x16GB GPU, 2x2609v4, 960GB SSD",
+    "monthly_price_eur": 343.04,
+    "detailed_prices": {
+      "monthly": "€ 343.04 / month",
+      "weekly": "€ 85.76 / week",
+      "daily": "€ 17.15 / day\n              \n                 *",
+      "per_minute": "€ 0.02 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "32 GB (2x16Gb) HBM2",
+      "cpu": "2 x Intel® Xeon® E5-2609v4 1.7 GHz",
+      "ram": "256 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/59"
+  },
+  {
+    "server_id": "60",
+    "title": "4x1080Ti, 4x11GB GPU, 2x2609v4, 64GB RAM",
+    "monthly_price_eur": 353.6,
+    "detailed_prices": {
+      "monthly": "€ 353.6 / month",
+      "weekly": "€ 88.4 / week",
+      "daily": "€ 18.16 / day\n              \n                 *",
+      "per_minute": "€ 0.02 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "44 GB (4x11GB) GDDR5x",
+      "cpu": "2 x Intel® Xeon® E5-2609v4 1.7 GHz",
+      "ram": "64 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/60"
+  },
+  {
+    "server_id": "61",
+    "title": "4x1080Ti, 4x11GB GPU, 2x2609v4, 128GB RAM",
+    "monthly_price_eur": 368.5,
+    "detailed_prices": {
+      "monthly": "€ 368.5 / month",
+      "weekly": "€ 92.14 / week",
+      "daily": "€ 18.44 / day\n              \n                 *",
+      "per_minute": "€ 0.03 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "44 GB (4x11GB) GDDR5x",
+      "cpu": "2 x Intel® Xeon® E5-2609v4 1.7 GHz",
+      "ram": "128 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/61"
+  },
+  {
+    "server_id": "62",
+    "title": "2 x 2080 Ti 64 GB RAM",
+    "monthly_price_eur": 480.02,
+    "detailed_prices": {
+      "monthly": "€ 480.02 / month",
+      "weekly": "€ 120.0 / week",
+      "daily": "€ 24.0 / day\n              \n                 *",
+      "per_minute": "€ 0.03 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "22 GB (2x11Gb) GDDR6",
+      "cpu": "Intel® Xeon® E5-2630V4 2.2 GHz",
+      "ram": "64 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/62"
+  },
+  {
+    "server_id": "63",
+    "title": "4 x 1080, 4x8GB GPU, 2 x 2609v4, 64GB RAM, 480GB SSD",
+    "monthly_price_eur": 293.5,
+    "detailed_prices": {
+      "monthly": "€ 293.5 / month",
+      "weekly": "€ 73.37 / week",
+      "daily": "€ 14.68 / day\n              \n                 *",
+      "per_minute": "€ 0.02 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "32 GB (4x8Gb) GDDR5x",
+      "cpu": "2 x Intel® Xeon® E5-2609v4 1.7 GHz",
+      "ram": "64 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/63"
+  },
+  {
+    "server_id": "69",
+    "title": "2x1080Ti , 2x11GB GPU, 2609v4, 32GB RAM",
+    "monthly_price_eur": 300.55,
+    "detailed_prices": {
+      "monthly": "€ 300.55 / month",
+      "weekly": "€ 75.14 / week",
+      "daily": "€ 15.04 / day\n              \n                 *",
+      "per_minute": "€ 0.02 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "22 GB (2x11GB) GDDR5x",
+      "cpu": "Intel® Xeon® E5-2609v4 1.7 GHz",
+      "ram": "32 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/69"
+  },
+  {
+    "server_id": "85",
+    "title": "1x3090, 1x24GB GPU, 2609v4, 64GB RAM",
+    "monthly_price_eur": 523.38,
+    "detailed_prices": {
+      "monthly": "€ 523.38 / month",
+      "weekly": "€ 130.85 / week",
+      "daily": "€ 26.18 / day\n              \n                 *",
+      "per_minute": "€ 0.03 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "24 GB (1x24Gb) GDDR6X",
+      "cpu": "Intel® Xeon® E5-2609v4 1,70 GHz",
+      "ram": "64 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/85"
+  },
+  {
+    "server_id": "88",
+    "title": "5x3090, 5x24GB GPU, 2x6226R, 384GB RAM",
+    "monthly_price_eur": 2503.95,
+    "detailed_prices": {
+      "monthly": "€ 2503.95 / month",
+      "weekly": "€ 625.99 / week",
+      "daily": "€ 125.2 / day\n              \n                 *",
+      "per_minute": "€ 0.13 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "120 GB (5x24GB) GDDR6X",
+      "cpu": "2x Intel® Xeon® Gold 6226R Processor 16C/32 3.9 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/88"
+  },
+  {
+    "server_id": "89",
+    "title": "4x3090, 4x24GB GPU, 2xE5-2630v4, 256GB RAM, 4TB SSD",
+    "monthly_price_eur": 2016.89,
+    "detailed_prices": {
+      "monthly": "€ 2016.89 / month",
+      "weekly": "€ 504.22 / week",
+      "daily": "€ 100.85 / day\n              \n                 *",
+      "per_minute": "€ 0.13 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "96GB (4x24GB) GDDR6X",
+      "cpu": "2 x Intel® Xeon® E5-2630v4 2.2 GHz",
+      "ram": "256 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/89"
+  },
+  {
+    "server_id": "90",
+    "title": "4x3090, 4x24GB GPU, 2xE5-2630v4, 256GB RAM, 2TB SSHD",
+    "monthly_price_eur": 2003.16,
+    "detailed_prices": {
+      "monthly": "€ 2003.16 / month",
+      "weekly": "€ 500.79 / week",
+      "daily": "€ 100.16 / day\n              \n                 *",
+      "per_minute": "€ 0.1 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "96GB (4x24GB) GDDR6X",
+      "cpu": "2 x Intel® Xeon® E5-2630v4 2.2 GHz",
+      "ram": "256 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/90"
+  },
+  {
+    "server_id": "92",
+    "title": "2x3090, 2x24GB GPU, 2x4210, 128GB RAM",
+    "monthly_price_eur": 993.7,
+    "detailed_prices": {
+      "monthly": "€ 993.7 / month",
+      "weekly": "€ 248.43 / week",
+      "daily": "€ 49.68 / day\n              \n                 *",
+      "per_minute": "€ 0.07 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "48 GB (2x24GB) GDDR6X",
+      "cpu": "2 x Intel® Xeon® Silver 4210, 3,20 GHz",
+      "ram": "128 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/92"
+  },
+  {
+    "server_id": "94",
+    "title": "1xA6000, 1x48GB GPU, 2609v4, 64GB RAM, 480GB SSD",
+    "monthly_price_eur": 694.76,
+    "detailed_prices": {
+      "monthly": "€ 694.76 / month",
+      "weekly": "€ 173.69 / week",
+      "daily": "€ 34.74 / day\n              \n                 *",
+      "per_minute": "€ 0.05 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "48 GB (1x48GB) GDDR6X",
+      "cpu": "Intel® Xeon® E5-2609v4 1,70 GHz",
+      "ram": "64 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/94"
+  },
+  {
+    "server_id": "98",
+    "title": "5x3090, 5x24GB GPU, 2x5217, 384GB RAM",
+    "monthly_price_eur": 2342.67,
+    "detailed_prices": {
+      "monthly": "€ 2342.67 / month",
+      "weekly": "€ 585.67 / week",
+      "daily": "€ 117.13 / day\n              \n                 *",
+      "per_minute": "€ 0.13 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "120GB (5x24GB) GDDR6X",
+      "cpu": "2x Intel® Xeon® Gold 5217 Processor 8C/16 3.0 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/98"
+  },
+  {
+    "server_id": "99",
+    "title": "8xA100, 8x40GB GPU, 2x6226R, 384GB RAM",
+    "monthly_price_eur": 7019.21,
+    "detailed_prices": {
+      "monthly": "€ 7019.21 / month",
+      "weekly": "€ 1755.0 / week",
+      "daily": "€ 350.96 / day\n              \n                 *",
+      "per_minute": "€ 0.31 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "320GB (8x40GB) HBM2",
+      "cpu": "2x Intel® Xeon® Gold 6226R Processor 16C/32 3.9 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/99"
+  },
+  {
+    "server_id": "103",
+    "title": "10xA10, 10x24GB GPU, 2x6226R, 384GB RAM",
+    "monthly_price_eur": 2274.67,
+    "detailed_prices": {
+      "monthly": "€ 2274.67 / month",
+      "weekly": "€ 568.68 / week",
+      "daily": "€ 113.74 / day\n              \n                 *",
+      "per_minute": "€ 0.12 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "240GB (10x24GB) GDDR6",
+      "cpu": "2x Intel® Xeon® Gold 6226R Processor 16C/32 3.9 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/103"
+  },
+  {
+    "server_id": "105",
+    "title": "5x3090, 5x24GB GPU, 2x6248R, 384GB RAM",
+    "monthly_price_eur": 2818.97,
+    "detailed_prices": {
+      "monthly": "€ 2818.97 / month",
+      "weekly": "€ 704.74 / week",
+      "daily": "€ 140.95 / day\n              \n                 *",
+      "per_minute": "€ 0.14 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "120GB (5x24GB) GDDR6X",
+      "cpu": "2 x Intel® Xeon® Gold 6248R Processor 24C/48, 4.00 GHz",
+      "ram": "384 GB RAM",
+      "nvme": "2000 GB NVME",
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/105"
+  },
+  {
+    "server_id": "107",
+    "title": "1xA6000, 1x48GB GPU, 2630v4, 128GB RAM",
+    "monthly_price_eur": 766.08,
+    "detailed_prices": {
+      "monthly": "€ 766.08 / month",
+      "weekly": "€ 191.53 / week",
+      "daily": "€ 38.32 / day\n              \n                 *",
+      "per_minute": "€ 0.05 / minute"
+    },
+    "specifications": {
+      "gpu_info": null,
+      "gpu_ram": "48GB (1x48GB) GDDR6X",
+      "cpu": "Intel® Xeon® E5-2630v4 2,2 GHz",
+      "ram": "128 GB RAM",
+      "nvme": null,
+      "network": "10 Gbps Port"
+    },
+    "configuration_url": "https://www.leadergpu.com/server_configurations/107"
+  }
+]

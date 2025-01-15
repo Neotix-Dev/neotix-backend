@@ -1,0 +1,26 @@
+# fly.toml app configuration file generated for neotix-backend on 2024-12-31T20:47:45-06:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'neotix-backend'
+primary_region = 'ewr'
+
+[build]
+
+[http_service]
+  internal_port = 5000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[env]
+  FLASK_APP = "app.py"
+  DATABASE_URI = "postgresql://postgres:lucqmEjqZQzEily@neotix-db.flycast:5432/neotix"
