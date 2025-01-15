@@ -19,10 +19,16 @@ def fetch_gpu_data():
     Fetches GPU data from all providers using gpuhunt and updates the database
     """
     current_time = datetime.utcnow()
-    gpu_hash_map = {}  # hash -> gpu_listing
     
     # Get all offers from all providers
     offers = gpuhunt.query()
+    
+    # Get all existing listings for deduplication
+    existing_listings = {}
+    for listing in GPUListing.query.all():
+        # Create a unique key for each listing
+        key = f"{listing.instance_name}:{listing.gpu_name}:{listing.gpu_count}:{listing.gpu_memory}:{listing.cpu}:{listing.memory}:{listing.disk_size}:{listing.host.name}"
+        existing_listings[key] = listing
     
     for offer in offers:
         # Skip GCP offers and those without GPUs
@@ -40,42 +46,58 @@ def fetch_gpu_data():
             db.session.add(host)
             db.session.flush()
             
-        # Create hash for comparison
-        offer_hash = hash_gpu_listing(offer)
+        # Create key for deduplication
+        listing_key = f"{offer.instance_name}:{offer.gpu_name}:{offer.gpu_count}:{offer.gpu_memory}:{offer.cpu}:{offer.memory}:{offer.disk_size}:{offer.provider}"
         
-        # Skip if we've seen this exact configuration
-        if offer_hash in gpu_hash_map:
-            continue
-            
-        # Store in hash map
-        gpu_listing = GPUListing(
-            instance_name=offer.instance_name,
-            gpu_name=offer.gpu_name,
-            gpu_vendor=offer.gpu_vendor.value if offer.gpu_vendor else None,
-            gpu_count=offer.gpu_count,
-            gpu_memory=offer.gpu_memory,
-            current_price=offer.price,
-            cpu=offer.cpu,
-            memory=offer.memory,
-            disk_size=offer.disk_size,
-            host_id=host.id
-        )
-        # Set default price change
-        gpu_listing.price_change = "0%"
+        if listing_key in existing_listings:
+            # Update existing listing
+            gpu_listing = existing_listings[listing_key]
+            if gpu_listing.current_price != offer.price:
+                # Calculate price change percentage
+                price_change = ((offer.price - gpu_listing.current_price) / gpu_listing.current_price) * 100
+                gpu_listing.price_change = f"{price_change:+.1f}%"
+            gpu_listing.current_price = offer.price
+            gpu_listing.last_updated = current_time
+        else:
+            # Create new listing
+            gpu_listing = GPUListing(
+                instance_name=offer.instance_name,
+                gpu_name=offer.gpu_name,
+                gpu_vendor=offer.gpu_vendor.value if offer.gpu_vendor else None,
+                gpu_count=offer.gpu_count,
+                gpu_memory=offer.gpu_memory,
+                current_price=offer.price,
+                cpu=offer.cpu,
+                memory=offer.memory,
+                disk_size=offer.disk_size,
+                host_id=host.id
+            )
+            gpu_listing.price_change = "0%"
+            db.session.add(gpu_listing)
+            db.session.flush()
+            existing_listings[listing_key] = gpu_listing
         
-        gpu_hash_map[offer_hash] = gpu_listing
-        db.session.add(gpu_listing)
-        db.session.flush()
-        
-        # Create price point
-        price_point = GPUPricePoint(
+        # Update or create price point
+        price_point = GPUPricePoint.query.filter_by(
             gpu_listing_id=gpu_listing.id,
-            price=offer.price,
             location=offer.location,
-            spot=offer.spot,
-            last_updated=current_time
-        )
-        db.session.add(price_point)
+            spot=offer.spot
+        ).first()
+        
+        if price_point:
+            # Update existing price point
+            price_point.price = offer.price
+            price_point.last_updated = current_time
+        else:
+            # Create new price point
+            price_point = GPUPricePoint(
+                gpu_listing_id=gpu_listing.id,
+                price=offer.price,
+                location=offer.location,
+                spot=offer.spot,
+                last_updated=current_time
+            )
+            db.session.add(price_point)
         
         # Add historical price record
         history = GPUPriceHistory(
