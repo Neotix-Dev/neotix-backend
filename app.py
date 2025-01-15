@@ -8,11 +8,13 @@ from routes.project import bp as project_bp
 from models.user import User
 from models.project import Project, ProjectGPU
 from models.gpu_listing import GPUListing
+from commands.fetch_gpu_data import fetch_gpu_data_command
 import os
 from firebase_admin import credentials
 import firebase_admin
 from config import Config
 from dotenv import load_dotenv
+from flask_migrate import Migrate
 
 # Load environment variables from .env file
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
@@ -81,11 +83,17 @@ def create_app(environ=None, start_response=None):
     # Initialize database tables
     init_db(app)
 
+    # Initialize flask_migrate
+    migrate = Migrate(app, db)
+
     # Register blueprints
     app.register_blueprint(user_preferences_bp, url_prefix="/api/preferences")
     app.register_blueprint(gpu_bp, url_prefix="/api/gpu")
     app.register_blueprint(user_bp, url_prefix="/api/user")
     app.register_blueprint(project_bp, url_prefix="/api/projects")
+    
+    # Register CLI commands
+    app.cli.add_command(fetch_gpu_data_command)
 
     # Add CORS headers to all responses
     @app.after_request
