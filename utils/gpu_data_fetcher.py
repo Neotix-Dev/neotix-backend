@@ -1,5 +1,12 @@
+import sys
+import os
 from datetime import datetime
 import hashlib
+
+# Add gpuhunt submodule to Python path
+gpuhunt_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'gpuhunt', 'src')
+sys.path.insert(0, gpuhunt_path)
+
 import gpuhunt
 from models.gpu_listing import GPUListing, GPUPricePoint, GPUPriceHistory, Host
 from utils.database import db

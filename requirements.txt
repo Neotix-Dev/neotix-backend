@@ -11,8 +11,6 @@ psycopg2-binary==2.9.9
 SQLAlchemy-Utils==0.41.1
 
 # GPU Data
-gpuhunt>=0.1.0
-
 
 # Development Tools
 python-dotenv>=1.0.0
