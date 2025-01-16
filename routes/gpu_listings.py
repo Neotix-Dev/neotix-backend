@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from models.gpu_listing import GPUListing, Host, GPUPriceHistory, GPUPricePoint
 from utils.database import db
 from datetime import datetime
+from sqlalchemy import func, or_
 
 bp = Blueprint("gpu", __name__)
 
@@ -22,8 +23,68 @@ def get_all_gpus():
 @bp.route("/search", methods=["GET"])
 def search_gpus():
     try:
-        query = request.args.get("q", "")
-        listings = GPUListing.query.filter(GPUListing.name.ilike(f"%{query}%")).all()
+        query = request.args.get("q", "").strip()
+        if not query:
+            return jsonify([])
+            
+        # Try to extract numeric value from query
+        numeric_value = None
+        try:
+            # Extract first number from query string
+            import re
+            match = re.search(r'\d+', query)
+            if match:
+                numeric_value = float(match.group())
+        except:
+            pass
+            
+        # Search across multiple fields with ranking
+        search_fields = [
+            GPUListing.gpu_name,
+            GPUListing.instance_name,
+            GPUListing.gpu_vendor
+        ]
+        
+        # Create search conditions for each field
+        conditions = []
+        for field in search_fields:
+            conditions.append(field.ilike(f"%{query}%"))
+            
+        # Add numeric field conditions if numeric value found
+        if numeric_value is not None:
+            conditions.extend([
+                GPUListing.gpu_memory == numeric_value,
+                GPUListing.current_price == numeric_value,
+                GPUListing.cpu == numeric_value,
+                GPUListing.memory == numeric_value
+            ])
+            
+        # Enable fuzzy search using pg_trgm similarity
+        from sqlalchemy import func
+        
+        # Calculate similarity scores for each field
+        gpu_name_sim = func.similarity(GPUListing.gpu_name, query)
+        instance_name_sim = func.similarity(GPUListing.instance_name, query)
+        gpu_vendor_sim = func.similarity(GPUListing.gpu_vendor, query)
+        
+        # Calculate numeric field similarities
+        gpu_memory_sim = func.abs(GPUListing.gpu_memory - numeric_value) if numeric_value is not None else 0
+        price_sim = func.abs(GPUListing.current_price - numeric_value) if numeric_value is not None else 0
+        
+        # Get results ordered by best match
+        listings = GPUListing.query.filter(
+            db.or_(*conditions)
+        ).order_by(
+            db.desc(gpu_name_sim),
+            db.desc(instance_name_sim),
+            db.desc(gpu_vendor_sim),
+            *(
+                [db.desc(-gpu_memory_sim), db.desc(-price_sim)]
+                if numeric_value is not None
+                else []
+            )
+        ).limit(50).all()
+        
         return jsonify([listing.to_dict() for listing in listings])
     except Exception as e:
         print(f"Error searching GPUs: {str(e)}")
@@ -80,9 +141,11 @@ def get_paginated_gpus(page_number):
         return jsonify({"error": f"Failed to fetch GPUs for page {page_number}"}), 500
 
 
-@bp.route("/api/gpu/filtered", methods=["GET"])
+@bp.route("/filtered", methods=["GET"])
 def get_filtered_gpus():
     try:
+        print(f"Received filter request with params: {request.args}")
+        
         # Get query parameters with defaults
         gpu_name = request.args.get("gpu_name")
         gpu_vendor = request.args.get("gpu_vendor")
@@ -101,6 +164,8 @@ def get_filtered_gpus():
         sort_order = request.args.get("sort_order", "asc")
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 20, type=int)
+        
+        print(f"Parsed parameters: min_gpu_memory={min_gpu_memory}, max_gpu_memory={max_gpu_memory}")
 
         # Start with base query
         query = GPUListing.query
@@ -155,7 +220,7 @@ def get_filtered_gpus():
         return jsonify({"error": "Failed to filter GPUs"}), 500
 
 
-@bp.route("/api/gpu/vendors", methods=["GET"])
+@bp.route("/vendors", methods=["GET"])
 def get_gpu_vendors():
     try:
         vendors = db.session.query(GPUListing.gpu_vendor).distinct().all()
@@ -167,7 +232,7 @@ def get_gpu_vendors():
         return jsonify({"error": "Failed to fetch GPU vendors"}), 500
 
 
-@bp.route("/api/gpu/<int:gpu_id>/price-history", methods=["GET"])
+@bp.route("/<int:gpu_id>/price-history", methods=["GET"])
 def get_gpu_price_history(gpu_id):
     try:
         # Get query parameters
@@ -200,7 +265,7 @@ def get_gpu_price_history(gpu_id):
         return jsonify({"error": f"Failed to fetch price history for GPU {gpu_id}"}), 500
 
 
-@bp.route("/api/gpu/<int:gpu_id>/price-points", methods=["GET"])
+@bp.route("/<int:gpu_id>/price-points", methods=["GET"])
 def get_gpu_price_points(gpu_id):
     try:
         # Get all current price points for the GPU

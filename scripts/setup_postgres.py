@@ -50,6 +50,14 @@ def setup_postgres():
         logger.info("Creating neotix database...")
         run_command(["createdb", "neotix"])
 
+        # Enable pg_trgm extension
+        logger.info("Enabling pg_trgm extension...")
+        run_command([
+            "psql",
+            "-d", "neotix",
+            "-c", "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+        ])
+
         # Update local .env file
         env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
         env_content = """DATABASE_URI=postgresql://postgres:postgres@localhost:5432/neotix

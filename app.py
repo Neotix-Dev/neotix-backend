@@ -31,7 +31,7 @@ def create_app(environ=None, start_response=None):
 
     try:
         # Initialize Firebase Admin with your service account
-        cred = credentials.Certificate("firebaseKey.json")
+        cred = credentials.Certificate(os.path.join(os.path.dirname(__file__), "firebaseKey.json"))
         firebase_admin.initialize_app(cred)
     except ValueError:
         # Firebase already initialized, skip
@@ -126,10 +126,13 @@ if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
 
 
-#TODO: on 01/15: Add new routes for new UI 
-
 #TODO: on 01/15: Improve speed of getting things inside the DB. + There are problems with some duplicates, like 10 of them in case we call the command twice 
 
 #TODO: on 01/15: Improve DB schem for the User GPU selections. 
 
-#TODO: Add more providers to gpulist
+# TODO: Compute and add score to each GPU 
+
+#TODO: Add more GPUs
+
+#TODO: Add or upgrade the routes that a user might need while using our db in real-time. ((search), (filter), (etc)) 
+
