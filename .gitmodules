@@ -1,0 +1,3 @@
+[submodule "gpuhunt"]
+	path = gpuhunt
+	url = https://github.com/Neotix-Dev/gpuhunt
