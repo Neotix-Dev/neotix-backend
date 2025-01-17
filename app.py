@@ -132,7 +132,4 @@ if __name__ == "__main__":
 
 # TODO: Compute and add score to each GPU 
 
-#TODO: Add more GPUs
-
-#TODO: Add or upgrade the routes that a user might need while using our db in real-time. ((search), (filter), (etc)) 
 

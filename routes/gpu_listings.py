@@ -159,6 +159,8 @@ def get_filtered_gpus():
         max_memory = request.args.get("max_memory", type=float)
         min_price = request.args.get("min_price", type=float)
         max_price = request.args.get("max_price", type=float)
+        min_gpu_score = request.args.get("min_gpu_score", type=float)
+        max_gpu_score = request.args.get("max_gpu_score", type=float)
         provider = request.args.get("provider")
         sort_by = request.args.get("sort_by", "current_price")
         sort_order = request.args.get("sort_order", "asc")
@@ -195,8 +197,18 @@ def get_filtered_gpus():
             query = query.filter(GPUListing.current_price >= min_price)
         if max_price is not None:
             query = query.filter(GPUListing.current_price <= max_price)
+        if min_gpu_score is not None:
+            query = query.filter(GPUListing.gpu_score >= min_gpu_score)
+        if max_gpu_score is not None:
+            query = query.filter(GPUListing.gpu_score <= max_gpu_score)
         if provider:
             query = query.join(Host).filter(Host.name == provider)
+
+        # Ensure all GPU scores are computed before sorting
+        for listing in query.all():
+            if listing.gpu_score is None:
+                listing.update_gpu_score()
+        db.session.commit()
 
         # Apply sorting
         sort_column = getattr(GPUListing, sort_by, GPUListing.current_price)

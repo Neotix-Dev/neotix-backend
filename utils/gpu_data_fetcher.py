@@ -65,6 +65,7 @@ def fetch_gpu_data():
                 gpu_listing.price_change = f"{price_change:+.1f}%"
             gpu_listing.current_price = offer.price
             gpu_listing.last_updated = current_time
+            gpu_listing.update_gpu_score()
         else:
             # Create new listing
             gpu_listing = GPUListing(
