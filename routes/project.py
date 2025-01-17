@@ -24,6 +24,24 @@ def get_user_projects():
         return jsonify({"error": str(e)}), 500
 
 
+@bp.route("/<int:project_id>", methods=["GET"])
+@require_auth()
+def get_project(project_id):
+    """Get a project"""
+    try:
+        user = User.query.filter_by(firebase_uid=g.user_id).first()
+        if not user:
+            return jsonify({"error": "User not found. Please sync your account."}), 404
+
+        project = Project.query.filter_by(id=project_id, user_id=user.id).first()
+        if not project:
+            return jsonify({"error": "Project not found"}), 404
+        return jsonify(project.to_dict()), 200
+    except Exception as e:
+        print(f"Error in get_project: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
 @bp.route("/", methods=["POST"])
 @require_auth()
 def create_project():
