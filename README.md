@@ -51,8 +51,9 @@ flask fetch-gpu-data
 ### Authentication
 Most endpoints require Firebase authentication token in the `Authorization` header.
 
-### GPU Endpoints (`/api/gpu`)
-- `GET /get_all` - Get all GPU listings
+### GPU Endpoints (`/api/gpu`)us
+- `GET /get_all` - Get all GPU listingsUS national
+- `GET /get_gpus/<page_number>` - Get paginated list of GPUs, start from page 1. Contains more info on the GPUs, better to use this endpoint as it pulls 200 GPUs at a time
 - `GET /<id>` - Get specific GPU by ID
 - `GET /search?q=<query>` - Search GPUs by name/specs with fuzzy matching
 - `GET /filtered` - Get filtered GPUs with pagination
