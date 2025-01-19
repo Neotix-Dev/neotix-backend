@@ -16,9 +16,9 @@ pip install -r requirements.txt
 ```
 
 3. Install PostgreSQL if not already installed
-'''bash
+```bash
 sudo pacman -S postgresql
-'''
+```
 
 Note: These are for linux, if on mac, pacman will not work. You will have to use brew.
 
