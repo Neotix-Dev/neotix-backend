@@ -132,4 +132,10 @@ if __name__ == "__main__":
 
 # TODO: Compute and add score to each GPU 
 
+#TODO: AWS Copilot 
 
+#TODO: Supabase 
+
+#TODO: frontend using Vercel! 
+
+#TODO:
