@@ -104,8 +104,8 @@ def get_gpu(id):
 @bp.route("/hosts", methods=["GET"])
 def get_hosts():
     try:
-        hosts = Host.query.all()
-        return jsonify([host.to_dict() for host in hosts])
+        hosts = Host.query.with_entities(Host.name).distinct().all()
+        return jsonify([host[0] for host in hosts])
     except Exception as e:
         print(f"Error fetching hosts: {str(e)}")
         return jsonify({"error": "Failed to fetch hosts"}), 500
@@ -144,104 +144,93 @@ def get_paginated_gpus(page_number):
 @bp.route("/filtered", methods=["GET"])
 def get_filtered_gpus():
     try:
-        print(f"Received filter request with params: {request.args}")
-        
-        # Get query parameters with defaults
-        gpu_name = request.args.get("gpu_name")
-        gpu_vendor = request.args.get("gpu_vendor")
-        min_gpu_count = request.args.get("min_gpu_count", type=int)
-        max_gpu_count = request.args.get("max_gpu_count", type=int)
-        min_gpu_memory = request.args.get("min_gpu_memory", type=float)
-        max_gpu_memory = request.args.get("max_gpu_memory", type=float)
-        min_cpu = request.args.get("min_cpu", type=int)
-        max_cpu = request.args.get("max_cpu", type=int)
-        min_memory = request.args.get("min_memory", type=float)
-        max_memory = request.args.get("max_memory", type=float)
-        min_price = request.args.get("min_price", type=float)
-        max_price = request.args.get("max_price", type=float)
-        min_gpu_score = request.args.get("min_gpu_score", type=float)
-        max_gpu_score = request.args.get("max_gpu_score", type=float)
-        provider = request.args.get("provider")
-        sort_by = request.args.get("sort_by", "current_price")
-        sort_order = request.args.get("sort_order", "asc")
+        # Get query parameters
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 20, type=int)
         
-        print(f"Parsed parameters: min_gpu_memory={min_gpu_memory}, max_gpu_memory={max_gpu_memory}")
+        # Get filter parameters
+        gpu_types = request.args.getlist("gpuTypes[]")
+        providers = request.args.getlist("providers[]")
+        vendors = request.args.getlist("vendors[]")
+        min_price = request.args.get("price.min", type=float)
+        max_price = request.args.get("price.max", type=float)
+        search = request.args.get("search", "").strip()
 
         # Start with base query
-        query = GPUListing.query
+        query = GPUListing.query.join(Host)
 
         # Apply filters
-        if gpu_name:
-            query = query.filter(GPUListing.gpu_name.ilike(f"%{gpu_name}%"))
-        if gpu_vendor:
-            query = query.filter(GPUListing.gpu_vendor == gpu_vendor)
-        if min_gpu_count is not None:
-            query = query.filter(GPUListing.gpu_count >= min_gpu_count)
-        if max_gpu_count is not None:
-            query = query.filter(GPUListing.gpu_count <= max_gpu_count)
-        if min_gpu_memory is not None:
-            query = query.filter(GPUListing.gpu_memory >= min_gpu_memory)
-        if max_gpu_memory is not None:
-            query = query.filter(GPUListing.gpu_memory <= max_gpu_memory)
-        if min_cpu is not None:
-            query = query.filter(GPUListing.cpu >= min_cpu)
-        if max_cpu is not None:
-            query = query.filter(GPUListing.cpu <= max_cpu)
-        if min_memory is not None:
-            query = query.filter(GPUListing.memory >= min_memory)
-        if max_memory is not None:
-            query = query.filter(GPUListing.memory <= max_memory)
+        if gpu_types:
+            query = query.filter(GPUListing.gpu_name.in_(gpu_types))
+        
+        if providers:
+            query = query.filter(Host.name.in_(providers))
+            
+        if vendors:
+            query = query.filter(GPUListing.gpu_vendor.in_(vendors))
+            
         if min_price is not None:
             query = query.filter(GPUListing.current_price >= min_price)
+            
         if max_price is not None:
             query = query.filter(GPUListing.current_price <= max_price)
-        if min_gpu_score is not None:
-            query = query.filter(GPUListing.gpu_score >= min_gpu_score)
-        if max_gpu_score is not None:
-            query = query.filter(GPUListing.gpu_score <= max_gpu_score)
-        if provider:
-            query = query.join(Host).filter(Host.name == provider)
+            
+        if search:
+            search_filter = or_(
+                GPUListing.gpu_name.ilike(f"%{search}%"),
+                Host.name.ilike(f"%{search}%"),
+                GPUListing.gpu_vendor.ilike(f"%{search}%")
+            )
+            query = query.filter(search_filter)
 
-        # Ensure all GPU scores are computed before sorting
-        for listing in query.all():
-            if listing.gpu_score is None:
-                listing.update_gpu_score()
-        db.session.commit()
-
-        # Apply sorting
-        sort_column = getattr(GPUListing, sort_by, GPUListing.current_price)
-        if sort_order == "desc":
-            sort_column = sort_column.desc()
-        query = query.order_by(sort_column)
+        # Get total count for pagination
+        total_count = query.count()
+        total_pages = (total_count + per_page - 1) // per_page
 
         # Apply pagination
-        paginated_listings = query.paginate(page=page, per_page=per_page, error_out=False)
-        
+        query = query.order_by(GPUListing.current_price.asc())
+        query = query.offset((page - 1) * per_page).limit(per_page)
+
+        # Execute query and format results
+        gpus = query.all()
+        results = []
+        for gpu in gpus:
+            gpu_dict = gpu.to_dict()
+            gpu_dict['provider'] = gpu.host.name if gpu.host else None
+            gpu_dict['provider_url'] = gpu.host.url if gpu.host else None
+            results.append(gpu_dict)
+
         return jsonify({
-            "gpus": [listing.to_dict() for listing in paginated_listings.items],
+            "gpus": results,
+            "total_pages": total_pages,
             "current_page": page,
-            "total_pages": paginated_listings.pages,
-            "total_items": paginated_listings.total,
-            "items_per_page": per_page
+            "total_gpus": total_count,
+            "gpus_per_page": per_page
         })
 
     except Exception as e:
-        print(f"Error filtering GPUs: {str(e)}")
-        return jsonify({"error": "Failed to filter GPUs"}), 500
+        print(f"Error in filtered GPUs: {str(e)}")
+        return jsonify({"error": "Failed to fetch filtered GPUs"}), 500
 
 
 @bp.route("/vendors", methods=["GET"])
 def get_gpu_vendors():
     try:
-        vendors = db.session.query(GPUListing.gpu_vendor).distinct().all()
-        # Extract vendors from tuples and filter out None values
-        vendor_list = [vendor[0] for vendor in vendors if vendor[0] is not None]
-        return jsonify(vendor_list)
+        vendors = GPUListing.query.with_entities(GPUListing.gpu_vendor).distinct().all()
+        return jsonify([vendor[0] for vendor in vendors if vendor[0]])
     except Exception as e:
         print(f"Error fetching GPU vendors: {str(e)}")
         return jsonify({"error": "Failed to fetch GPU vendors"}), 500
+
+
+@bp.route("/gpu_types", methods=["GET"])
+def get_gpu_types():
+    try:
+        gpu_types = GPUListing.query.with_entities(GPUListing.gpu_name).distinct().all()
+        return jsonify([gpu_type[0] for gpu_type in gpu_types if gpu_type[0]])
+    except Exception as e:
+        print(f"Error fetching GPU types: {str(e)}")
+        return jsonify({"error": "Failed to fetch GPU types"}), 500
 
 
 @bp.route("/<int:gpu_id>/price-history", methods=["GET"])

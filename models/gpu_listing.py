@@ -148,13 +148,13 @@ class GPUListing(db.Model):
             'gpu_count': self.gpu_count,
             'gpu_memory': self.gpu_memory,
             'current_price': self.current_price,
+            'gpu_score': self.gpu_score,
             'price_change': self.price_change,
             'cpu': self.cpu,
             'memory': self.memory,
             'disk_size': self.disk_size,
-            'provider': self.host.name,
-            'last_updated': self.last_updated.isoformat(),
-            'gpu_score': self.gpu_score
+            'provider': self.host.name if self.host else None,
+            'last_updated': self.last_updated.isoformat() if self.last_updated else None
         }
 
 class GPUPricePoint(db.Model):
