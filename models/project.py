@@ -21,6 +21,7 @@ class Project(db.Model):
             'description': self.description,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
+            'user_id': self.user_id,
             'gpus': [gpu.to_dict() for gpu in self.gpus]
         }
 
