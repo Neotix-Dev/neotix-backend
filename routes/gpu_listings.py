@@ -154,6 +154,12 @@ def get_filtered_gpus():
         vendors = request.args.getlist("vendors[]")
         min_price = request.args.get("price.min", type=float)
         max_price = request.args.get("price.max", type=float)
+        min_cpu = request.args.get("cpu.min", type=float)
+        max_cpu = request.args.get("cpu.max", type=float)
+        min_memory = request.args.get("memory.min", type=float)
+        max_memory = request.args.get("memory.max", type=float)
+        min_gpu_memory = request.args.get("gpu_memory.min", type=float)
+        max_gpu_memory = request.args.get("gpu_memory.max", type=float)
         search = request.args.get("search", "").strip()
 
         # Start with base query
@@ -174,6 +180,27 @@ def get_filtered_gpus():
             
         if max_price is not None:
             query = query.filter(GPUListing.current_price <= max_price)
+
+        # Apply CPU cores filter
+        if min_cpu is not None:
+            query = query.filter(GPUListing.cpu >= min_cpu)
+            
+        if max_cpu is not None:
+            query = query.filter(GPUListing.cpu <= max_cpu)
+
+        # Apply memory filter
+        if min_memory is not None:
+            query = query.filter(GPUListing.memory >= min_memory)
+            
+        if max_memory is not None:
+            query = query.filter(GPUListing.memory <= max_memory)
+
+        # Apply GPU memory filter
+        if min_gpu_memory is not None:
+            query = query.filter(GPUListing.gpu_memory >= min_gpu_memory)
+            
+        if max_gpu_memory is not None:
+            query = query.filter(GPUListing.gpu_memory <= max_gpu_memory)
             
         if search:
             search_filter = or_(
