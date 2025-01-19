@@ -1,24 +1,11 @@
 from utils.database import db 
 from datetime import datetime
 import math
-
-class Host(db.Model):
-    __tablename__ = 'hosts'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullable=False)  # This will store the provider name
-    description = db.Column(db.Text, nullable=False)
-    url = db.Column(db.String(255), nullable=True)
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'description': self.description,
-            'url': self.url
-        }
+from models.host import Host
 
 class GPUListing(db.Model):
     __tablename__ = 'gpu_listings'
+    __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
     instance_name = db.Column(db.String(255), nullable=False)
@@ -160,6 +147,7 @@ class GPUListing(db.Model):
 class GPUPricePoint(db.Model):
     """Real-time price points for each GPU instance in different regions"""
     __tablename__ = 'gpu_price_points'
+    __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
     gpu_listing_id = db.Column(db.Integer, db.ForeignKey('gpu_listings.id'), nullable=False)
@@ -180,6 +168,7 @@ class GPUPricePoint(db.Model):
 class GPUPriceHistory(db.Model):
     """Historical price records for each GPU instance"""
     __tablename__ = 'gpu_price_history'
+    __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
     gpu_listing_id = db.Column(db.Integer, db.ForeignKey('gpu_listings.id'), nullable=False)

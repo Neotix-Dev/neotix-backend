@@ -2,6 +2,12 @@
 dist
 dist-ssr
 *.local
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
 # Database files
 **/*.db
 
