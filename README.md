@@ -25,6 +25,7 @@ sudo -u postgres psql
 postgres=# CREATE DATABASE neotix;
 postgres=# \q
 ```
+Note: These are for linux, if on mac, pacman will not work. You will have to use brew.
 
 4. Create a `.env` file in the root directory:
 ```bash
