@@ -15,22 +15,21 @@ source .startup/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Set up PostgreSQL database:
-```bash
-# Install PostgreSQL if not already installed
+3. Install PostgreSQL if not already installed
+'''bash
 sudo pacman -S postgresql
+'''
 
-# Create database
-sudo -u postgres psql
-postgres=# CREATE DATABASE neotix;
-postgres=# \q
-```
 Note: These are for linux, if on mac, pacman will not work. You will have to use brew.
+
+
 
 4. Create a `.env` file in the root directory:
 ```bash
 DATABASE_URI=postgresql://postgres:postgres@localhost:5432/neotix
 ```
+5. Now run the script 'setup_postgres.py' in the scripts folder.
+   
 
 5. Initialize the database:
 ```bash
