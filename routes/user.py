@@ -14,8 +14,6 @@ bp = Blueprint("user_bp", __name__)
 def sync_user():
     """Sync Firebase user with backend database"""
     try:
-        # Get user data from request
-
         # Check if user already exists
         user = User.query.filter_by(firebase_uid=g.user_id).first()
 
@@ -27,12 +25,17 @@ def sync_user():
             print("updated user", user)
         else:
             # Create new user
+            name_parts = firebase_user.display_name.split() if firebase_user.display_name else ["", ""]
+            first_name = name_parts[0]
+            last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
+            
             user = User(
                 firebase_uid=g.user_id,  # Use the verified UID from the token
-                email=firebase_user.get("email"),
-                display_name=firebase_user.get("name"),
-                email_verified=firebase_user.get("email_verified", False),
-                disabled=firebase_user.get("disabled", False),
+                email=firebase_user.email,
+                first_name=first_name,
+                last_name=last_name,
+                email_verified=firebase_user.email_verified,
+                disabled=firebase_user.disabled,
                 created_at=datetime.utcnow(),
                 last_login=datetime.utcnow(),
             )
@@ -100,6 +103,7 @@ def update_user_profile():
         db.session.commit()
         return jsonify(user.to_dict()), 200
     except Exception as e:
+        print(f"Error in update_user_profile: {str(e)}")
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
