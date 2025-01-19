@@ -138,7 +138,7 @@ def add_gpu_to_project(project_id):
         if not data or not data.get("gpu_id"):
             return jsonify({"error": "GPU ID is required"}), 400
 
-        gpu = GPUListing.query.get(data["gpu_id"])
+        gpu = db.session.get(GPUListing, data["gpu_id"])
         if not gpu:
             return jsonify({"error": "GPU not found"}), 404
 
@@ -168,7 +168,7 @@ def remove_gpu_from_project(project_id, gpu_id):
         if not project:
             return jsonify({"error": "Project not found"}), 404
 
-        gpu = GPUListing.query.get(gpu_id)
+        gpu = db.session.get(GPUListing, gpu_id)
         if not gpu:
             return jsonify({"error": "GPU not found"}), 404
 
