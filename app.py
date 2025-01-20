@@ -15,14 +15,22 @@ import firebase_admin
 from config import Config
 from dotenv import load_dotenv
 from flask_migrate import Migrate
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
 # Debug: Print environment variables
-print("Current working directory:", os.getcwd())
-print("Environment file path:", os.path.join(os.path.dirname(__file__), ".env"))
-print("DATABASE_URI:", os.getenv("DATABASE_URI"))
+logger.info("Current working directory: %s", os.getcwd())
+logger.info("Environment file path: %s", os.path.join(os.path.dirname(__file__), ".env"))
+logger.info("DATABASE_URI: %s", os.getenv("DATABASE_URI"))
 
 
 def create_app(environ=None, start_response=None):
@@ -36,6 +44,9 @@ def create_app(environ=None, start_response=None):
     except ValueError:
         # Firebase already initialized, skip
         pass
+
+    # Enable Flask's logging
+    app.logger.setLevel(logging.INFO)
 
     # Configure CORS - Allow specific origins
     app.config["CORS_HEADERS"] = "Content-Type"
@@ -68,14 +79,14 @@ def create_app(environ=None, start_response=None):
             f.write("test")
         os.remove(test_file)
     except Exception as e:
-        print(f"Warning: Could not verify instance path is writable: {e}")
+        logger.warning(f"Could not verify instance path is writable: {e}")
 
     # Configure SQLite database with absolute path
     app.config.from_object(Config)
 
     # Debug: Print configuration
-    print("Database URI:", app.config.get("SQLALCHEMY_DATABASE_URI"))
-    print("Environment DATABASE_URI:", os.getenv("DATABASE_URI"))
+    logger.info("Database URI: %s", app.config.get("SQLALCHEMY_DATABASE_URI"))
+    logger.info("Environment DATABASE_URI: %s", os.getenv("DATABASE_URI"))
 
     # Initialize database
     db.init_app(app)
