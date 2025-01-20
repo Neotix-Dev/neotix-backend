@@ -5,6 +5,7 @@ from routes.user_preferences import bp as user_preferences_bp
 from routes.gpu_listings import bp as gpu_bp
 from routes.user import bp as user_bp
 from routes.project import bp as project_bp
+from routes.api import bp as api_bp
 from models.user import User
 from models.project import Project, ProjectGPU
 from models.gpu_listing import GPUListing
@@ -91,6 +92,7 @@ def create_app(environ=None, start_response=None):
     app.register_blueprint(gpu_bp, url_prefix="/api/gpu")
     app.register_blueprint(user_bp, url_prefix="/api/user")
     app.register_blueprint(project_bp, url_prefix="/api/projects")
+    app.register_blueprint(api_bp, url_prefix="/api")
     
     # Register CLI commands
     app.cli.add_command(fetch_gpu_data_command)
