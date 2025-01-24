@@ -2,6 +2,11 @@ import sys
 import os
 from datetime import datetime
 import hashlib
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # Add gpuhunt submodule to Python path
 gpuhunt_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'gpuhunt', 'src')
@@ -28,6 +33,7 @@ def fetch_gpu_data():
     current_time = datetime.utcnow()
     
     # Get all offers from all providers
+    logger.info("Starting GPU data fetch from all providers...")
     offers = gpuhunt.query()
     
     # Get all existing listings for deduplication
@@ -37,10 +43,18 @@ def fetch_gpu_data():
         key = f"{listing.instance_name}:{listing.gpu_name}:{listing.gpu_count}:{listing.gpu_memory}:{listing.cpu}:{listing.memory}:{listing.disk_size}:{listing.host.name}"
         existing_listings[key] = listing
     
+    current_provider = None
+    processed_gpus = 0
+    
     for offer in offers:
         # Skip GCP offers and those without GPUs
         if offer.provider == "gcp" or not offer.gpu_count or offer.gpu_count < 1:
             continue
+            
+        # Log when switching to a new provider
+        if current_provider != offer.provider:
+            current_provider = offer.provider
+            logger.info(f"Fetching GPU data from provider: {current_provider}")
             
         # Get or create host
         host = Host.query.filter_by(name=offer.provider).first()
@@ -116,10 +130,20 @@ def fetch_gpu_data():
             spot=offer.spot
         )
         db.session.add(history)
+        
+        # Increment processed GPUs counter and log progress
+        processed_gpus += 1
+        if processed_gpus % 100 == 0:
+            logger.info(f"Processed {processed_gpus} GPUs so far...")
+    
+    # Log completion
+    logger.info(f"GPU data fetch completed. Total GPUs processed: {processed_gpus}")
     
     # Commit all changes
     try:
         db.session.commit()
+        logger.info("Successfully saved all GPU data to database")
     except Exception as e:
         db.session.rollback()
+        logger.error(f"Error saving GPU data to database: {str(e)}")
         raise e
