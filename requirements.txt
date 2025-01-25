@@ -10,8 +10,10 @@ SQLAlchemy>=2.0.0
 psycopg2-binary==2.9.9
 SQLAlchemy-Utils==0.41.1
 
-# # GPU Data
+# GPU Data
 # gpuhunt
+git+https://github.com/Neotix-Dev/gpuhunt.git@main#subdirectory=src
+
 # Development Tools
 python-dotenv>=1.0.0
 tqdm>=4.65.0
@@ -26,3 +28,6 @@ pandas>=2.0.0
 requests>=2.31.0
 # openai>=1.0.0
 firebase-admin==6.2.0
+
+#web scraper
+beautifulsoup4>=4.12.2
