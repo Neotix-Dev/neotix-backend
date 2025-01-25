@@ -36,6 +36,10 @@ def fetch_gpu_data():
     logger.info("Starting GPU data fetch from all providers...")
     offers = gpuhunt.query()
     
+    # Log unique providers at the start
+    providers = set(offer.provider for offer in offers if offer.provider != "gcp" and offer.gpu_count and offer.gpu_count >= 1)
+    logger.info(f"Found providers: {', '.join(providers)}")
+    
     # Get all existing listings for deduplication
     existing_listings = {}
     for listing in GPUListing.query.all():
@@ -134,10 +138,12 @@ def fetch_gpu_data():
         # Increment processed GPUs counter and log progress
         processed_gpus += 1
         if processed_gpus % 100 == 0:
-            logger.info(f"Processed {processed_gpus} GPUs so far...")
+            logger.info(f"Processed {processed_gpus} GPUs...")
     
-    # Log completion
+    # Log completion with provider summary
+    active_providers = set(existing_listings[key].host.name for key in existing_listings)
     logger.info(f"GPU data fetch completed. Total GPUs processed: {processed_gpus}")
+    logger.info(f"Active providers in database: {', '.join(active_providers)}")
     
     # Commit all changes
     try:
