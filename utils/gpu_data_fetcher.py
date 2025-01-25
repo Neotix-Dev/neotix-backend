@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 gpuhunt_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'gpuhunt', 'src')
 sys.path.insert(0, gpuhunt_path)
 
-import gpuhunt
+from gpuhunt._internal.default import query
 from models.gpu_listing import GPUListing, GPUPricePoint, GPUPriceHistory, Host
 from utils.database import db
 
@@ -34,7 +34,7 @@ def fetch_gpu_data():
     
     # Get all offers from all providers
     logger.info("Starting GPU data fetch from all providers...")
-    offers = gpuhunt.query()
+    offers = query()
     
     # Log unique providers at the start
     providers = set(offer.provider for offer in offers if offer.provider != "gcp" and offer.gpu_count and offer.gpu_count >= 1)
