@@ -5,9 +5,15 @@ from routes.user_preferences import bp as user_preferences_bp
 from routes.gpu_listings import bp as gpu_bp
 from routes.user import bp as user_bp
 from routes.project import bp as project_bp
-from models.user import User
-from models.project import Project, ProjectGPU
-from models.gpu_listing import GPUListing
+from routes.credit import bp as credit_bp
+from models import (
+    User,
+    Project,
+    ProjectGPU,
+    GPUListing,
+    Credit,
+    CreditTransaction,
+)
 from commands.fetch_gpu_data import fetch_gpu_data_command
 import os
 from firebase_admin import credentials
@@ -19,8 +25,7 @@ import logging
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -29,7 +34,9 @@ load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
 # Debug: Print environment variables
 logger.info("Current working directory: %s", os.getcwd())
-logger.info("Environment file path: %s", os.path.join(os.path.dirname(__file__), ".env"))
+logger.info(
+    "Environment file path: %s", os.path.join(os.path.dirname(__file__), ".env")
+)
 logger.info("DATABASE_URI: %s", os.getenv("DATABASE_URI"))
 
 
@@ -39,7 +46,9 @@ def create_app(environ=None, start_response=None):
 
     try:
         # Initialize Firebase Admin with your service account
-        cred = credentials.Certificate(os.path.join(os.path.dirname(__file__), "firebaseKey.json"))
+        cred = credentials.Certificate(
+            os.path.join(os.path.dirname(__file__), "firebaseKey.json")
+        )
         firebase_admin.initialize_app(cred)
     except ValueError:
         # Firebase already initialized, skip
@@ -102,7 +111,8 @@ def create_app(environ=None, start_response=None):
     app.register_blueprint(gpu_bp, url_prefix="/api/gpu")
     app.register_blueprint(user_bp, url_prefix="/api/user")
     app.register_blueprint(project_bp, url_prefix="/api/projects")
-    
+    app.register_blueprint(credit_bp, url_prefix="/api/credit")
+
     # Register CLI commands
     app.cli.add_command(fetch_gpu_data_command)
 
@@ -137,16 +147,16 @@ if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
 
 
-#TODO: on 01/15: Improve speed of getting things inside the DB. + There are problems with some duplicates, like 10 of them in case we call the command twice 
+# TODO: on 01/15: Improve speed of getting things inside the DB. + There are problems with some duplicates, like 10 of them in case we call the command twice
 
-#TODO: on 01/15: Improve DB schem for the User GPU selections. 
+# TODO: on 01/15: Improve DB schem for the User GPU selections.
 
-# TODO: Compute and add score to each GPU 
+# TODO: Compute and add score to each GPU
 
-#TODO: AWS Copilot 
+# TODO: AWS Copilot
 
-#TODO: Supabase 
+# TODO: Supabase
 
-#TODO: frontend using Vercel! 
+# TODO: frontend using Vercel!
 
-#TODO:
+# TODO:

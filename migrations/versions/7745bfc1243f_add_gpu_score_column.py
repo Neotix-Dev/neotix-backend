@@ -1,7 +1,7 @@
 """add_gpu_score_column
 
 Revision ID: 7745bfc1243f
-Revises: None
+Revises: 1c11b26cc472
 Create Date: 2025-01-16 19:06:57.868544
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '7745bfc1243f'
-down_revision = None
+down_revision = '1c11b26cc472'
 branch_labels = None
 depends_on = None
 

@@ -1,5 +1,6 @@
 from utils.database import db
 from datetime import datetime
+from models.credit import Credit, CreditTransaction
 
 
 class User(db.Model):
@@ -17,6 +18,7 @@ class User(db.Model):
     last_name = db.Column(db.String(255), nullable=False)
     experience_level = db.Column(db.String(50), default="beginner")
     referral_source = db.Column(db.String(50), default="")
+    stripe_customer_id = db.Column(db.String(255), unique=True)
 
     # Relationships with preference models
     # rented_gpus = db.relationship("RentedGPU", backref=db.backref("user", lazy=True))
@@ -26,6 +28,10 @@ class User(db.Model):
 
     # Add projects relationship
     projects = db.relationship('Project', backref='user', lazy=True)
+    
+    # Add credit relationships
+    credit = db.relationship('Credit', backref='user', uselist=False, lazy=True)
+    credit_transactions = db.relationship('CreditTransaction', backref='user', lazy=True)
 
     def __repr__(self):
         return f"<User {self.email}>"
@@ -44,7 +50,9 @@ class User(db.Model):
             "last_name": self.last_name,
             "experience_level": self.experience_level,
             "referral_source": self.referral_source,
-            "projects": [project.to_dict() for project in self.projects]
+            "projects": [project.to_dict() for project in self.projects],
+            "stripe_customer_id": self.stripe_customer_id,
+            "credit_balance": self.credit.balance / 100 if self.credit else 0
         }
 
     @staticmethod
