@@ -5,9 +5,11 @@ from routes.user_preferences import bp as user_preferences_bp
 from routes.gpu_listings import bp as gpu_bp
 from routes.user import bp as user_bp
 from routes.project import bp as project_bp
+from routes.transactions import bp as transactions_bp
 from models.user import User
 from models.project import Project, ProjectGPU
 from models.gpu_listing import GPUListing
+from models.transaction import Transaction
 from commands.fetch_gpu_data import fetch_gpu_data_command
 import os
 from firebase_admin import credentials
@@ -102,6 +104,7 @@ def create_app(environ=None, start_response=None):
     app.register_blueprint(gpu_bp, url_prefix="/api/gpu")
     app.register_blueprint(user_bp, url_prefix="/api/user")
     app.register_blueprint(project_bp, url_prefix="/api/projects")
+    app.register_blueprint(transactions_bp, url_prefix="/api/transactions")
     
     # Register CLI commands
     app.cli.add_command(fetch_gpu_data_command)
