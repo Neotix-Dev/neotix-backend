@@ -18,6 +18,7 @@ class User(db.Model):
     experience_level = db.Column(db.String(50), default="beginner")
     referral_source = db.Column(db.String(50), default="")
     balance = db.Column(db.Float, default=0.0)  # User's balance in dollars
+    stripe_customer_id = db.Column(db.String(255), unique=True)  # Stripe customer ID for saved payment methods
 
     # Relationships with preference models
     # rented_gpus = db.relationship("RentedGPU", backref=db.backref("user", lazy=True))
@@ -50,6 +51,7 @@ class User(db.Model):
             "experience_level": self.experience_level,
             "referral_source": self.referral_source,
             "balance": self.balance,
+            "stripe_customer_id": self.stripe_customer_id,
             "projects": [project.to_dict() for project in self.projects],
             "transactions": [transaction.to_dict() for transaction in self.transactions]
         }
