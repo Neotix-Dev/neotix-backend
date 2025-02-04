@@ -25,10 +25,14 @@ def sync_user():
             print("updated user", user)
         else:
             # Create new user
-            name_parts = firebase_user.display_name.split() if firebase_user.display_name else ["", ""]
+            name_parts = (
+                firebase_user.display_name.split()
+                if firebase_user.display_name
+                else ["", ""]
+            )
             first_name = name_parts[0]
             last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
-            
+
             user = User(
                 firebase_uid=g.user_id,  # Use the verified UID from the token
                 email=firebase_user.email,
