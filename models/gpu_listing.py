@@ -17,45 +17,69 @@ class Host(db.Model):
         self.url = url
 
 
+class GPUConfiguration(db.Model):
+    """Hardware configuration for GPU instances"""
+    __tablename__ = 'gpu_configurations'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    hash = db.Column(db.String(64), unique=True, nullable=False)  # SHA-256 hash
+    gpu_name = db.Column(db.String(255), nullable=True)
+    gpu_vendor = db.Column(db.String(50), nullable=True)
+    gpu_count = db.Column(db.Integer, nullable=False)
+    gpu_memory = db.Column(db.Float, nullable=True)
+    cpu = db.Column(db.Integer, nullable=True)
+    memory = db.Column(db.Float, nullable=True)
+    disk_size = db.Column(db.Float, nullable=True)
+    gpu_score = db.Column(db.Float, nullable=True)
+
+    # Relationships
+    listings = db.relationship('GPUListing', backref='configuration', lazy='dynamic')
+    price_history = db.relationship('GPUPriceHistory', backref='configuration', lazy='dynamic')
+
+    def __init__(self, hash, gpu_name, gpu_vendor, gpu_count, gpu_memory, cpu, memory, disk_size):
+        self.hash = hash
+        self.gpu_name = gpu_name
+        self.gpu_vendor = gpu_vendor
+        self.gpu_count = gpu_count
+        self.gpu_memory = gpu_memory
+        self.cpu = cpu
+        self.memory = memory
+        self.disk_size = disk_size
+        self.gpu_score = self.compute_gpu_score()
+
+    def compute_gpu_score(self):
+        """Compute a score for the GPU configuration"""
+        return GPUListing.compute_gpu_score(
+            self.gpu_name,
+            self.gpu_vendor,
+            self.gpu_memory,
+            self.gpu_count
+        )
+
+
 class GPUListing(db.Model):
     __tablename__ = 'gpu_listings'
     __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
     instance_name = db.Column(db.String(255), nullable=False)
-    gpu_name = db.Column(db.String(255), nullable=True)
-    gpu_vendor = db.Column(db.String(50), nullable=True)  # NVIDIA, AMD, or GOOGLE
-    gpu_count = db.Column(db.Integer, nullable=False)
-    gpu_memory = db.Column(db.Float, nullable=True)  # in GB
-    current_price = db.Column(db.Float, nullable=False)  # Lowest current price
-    gpu_score = db.Column(db.Float, nullable=True)  # Computed GPU score
+    configuration_id = db.Column(db.Integer, db.ForeignKey('gpu_configurations.id'), nullable=False)
+    current_price = db.Column(db.Float, nullable=False)
     price_change = db.Column(db.String(10), nullable=False, default="0%")
-    cpu = db.Column(db.Integer, nullable=True)
-    memory = db.Column(db.Float, nullable=True)  # in GB
-    disk_size = db.Column(db.Float, nullable=True)  # in GB
     host_id = db.Column(db.Integer, db.ForeignKey('hosts.id'), nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     # Relationships
     host = db.relationship('Host', backref='listings')
     price_points = db.relationship('GPUPricePoint', backref='gpu', lazy='dynamic')
-    price_history = db.relationship('GPUPriceHistory', backref='gpu', lazy='dynamic')
 
-    def __init__(self, instance_name, gpu_name, gpu_vendor, gpu_count, gpu_memory,
-                 current_price, cpu, memory, disk_size, host_id):
+    def __init__(self, instance_name, configuration_id, current_price, host_id):
         self.instance_name = instance_name
-        self.gpu_name = gpu_name
-        self.gpu_vendor = gpu_vendor
-        self.gpu_count = gpu_count
-        self.gpu_memory = gpu_memory
+        self.configuration_id = configuration_id
         self.current_price = current_price
-        self.cpu = cpu
-        self.memory = memory
-        self.disk_size = disk_size
         self.host_id = host_id
         self.last_updated = datetime.utcnow()
-        # Compute initial GPU score
-        self.gpu_score = self.compute_gpu_score(gpu_name, gpu_vendor, gpu_memory, gpu_count)
 
     @staticmethod
     def compute_gpu_score(gpu_name, gpu_vendor, gpu_memory, gpu_count):
@@ -129,34 +153,33 @@ class GPUListing(db.Model):
 
     def update_gpu_score(self):
         """Update the GPU score for this listing."""
-        self.gpu_score = self.compute_gpu_score(
-            self.gpu_name,
-            self.gpu_vendor,
-            self.gpu_memory,
-            self.gpu_count
+        config = self.configuration
+        config.gpu_score = self.compute_gpu_score(
+            config.gpu_name,
+            config.gpu_vendor,
+            config.gpu_memory,
+            config.gpu_count
         )
 
     def to_dict(self):
-        # Ensure score is computed if not already set
-        if self.gpu_score is None:
-            self.update_gpu_score()
-            
+        config = self.configuration
         return {
             'id': self.id,
             'instance_name': self.instance_name,
-            'gpu_name': self.gpu_name,
-            'gpu_vendor': self.gpu_vendor,
-            'gpu_count': self.gpu_count,
-            'gpu_memory': self.gpu_memory,
+            'gpu_name': config.gpu_name,
+            'gpu_vendor': config.gpu_vendor,
+            'gpu_count': config.gpu_count,
+            'gpu_memory': config.gpu_memory,
             'current_price': self.current_price,
-            'gpu_score': self.gpu_score,
+            'gpu_score': config.gpu_score,
             'price_change': self.price_change,
-            'cpu': self.cpu,
-            'memory': self.memory,
-            'disk_size': self.disk_size,
+            'cpu': config.cpu,
+            'memory': config.memory,
+            'disk_size': config.disk_size,
             'provider': self.host.name if self.host else None,
             'last_updated': self.last_updated.isoformat() if self.last_updated else None
         }
+
 
 class GPUPricePoint(db.Model):
     """Real-time price points for each GPU instance in different regions"""
@@ -179,13 +202,14 @@ class GPUPricePoint(db.Model):
             'last_updated': self.last_updated.isoformat()
         }
 
+
 class GPUPriceHistory(db.Model):
-    """Historical price records for each GPU instance"""
+    """Historical price records for each GPU configuration"""
     __tablename__ = 'gpu_price_history'
     __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
-    gpu_listing_id = db.Column(db.Integer, db.ForeignKey('gpu_listings.id'), nullable=False)
+    configuration_id = db.Column(db.Integer, db.ForeignKey('gpu_configurations.id'), nullable=False)
     price = db.Column(db.Float, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     location = db.Column(db.String(255), nullable=False)
