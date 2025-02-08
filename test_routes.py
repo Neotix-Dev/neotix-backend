@@ -143,6 +143,6 @@ def test_user_routes_get(client):
     response = client.get("/api/user/")
     assert response.status_code == 405
 
-def test_project_routes_get(client):
-    response = client.get("/api/projects/")
+def test_cluster_routes_get(client):
+    response = client.get("/api/clusters/")
     assert response.status_code == 401
