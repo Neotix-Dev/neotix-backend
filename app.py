@@ -4,11 +4,11 @@ from utils.database import db, init_db
 from routes.user_preferences import bp as user_preferences_bp
 from routes.gpu_listings import bp as gpu_bp
 from routes.user import bp as user_bp
-from routes.project import bp as project_bp
+from routes.cluster import bp as cluster_bp
 from routes.transactions import bp as transactions_bp
 from routes.analytics import bp as analytics_bp
 from models.user import User
-from models.project import Project, ProjectGPU
+from models.cluster import Cluster, RentalGPU
 from models.gpu_listing import GPUListing
 from models.transaction import Transaction
 from commands.fetch_gpu_data import fetch_gpu_data_command
@@ -101,12 +101,12 @@ def create_app(environ=None, start_response=None):
     migrate = Migrate(app, db)
 
     # Register blueprints
-    app.register_blueprint(gpu_bp, url_prefix="/api/gpu")
-    app.register_blueprint(user_bp, url_prefix="/api/user")
-    app.register_blueprint(project_bp, url_prefix="/api/projects")
+    app.register_blueprint(user_preferences_bp, url_prefix="/api/user-preferences")
+    app.register_blueprint(gpu_bp, url_prefix="/api/gpus")
+    app.register_blueprint(user_bp, url_prefix="/api/users")
+    app.register_blueprint(cluster_bp, url_prefix="/api/clusters")
     app.register_blueprint(transactions_bp, url_prefix="/api/transactions")
-    app.register_blueprint(user_preferences_bp, url_prefix="/api/preferences")
-    app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
+    app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
     
     # Register CLI commands
     app.cli.add_command(fetch_gpu_data_command)
