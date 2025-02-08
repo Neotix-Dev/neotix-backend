@@ -1,23 +1,9 @@
 [
   {
-    "sessionId": "61200143-57b9-4128-90a2-526754bab094",
-    "timestamp": 1738810112599,
+    "sessionId": "bb38cc71-2d47-4270-8c30-40a1e7aaffd4",
+    "timestamp": 1738988918764,
     "viewType": "table",
     "initialView": "table",
-    "recorded_at": "2025-02-06T02:48:32.719209"
-  },
-  {
-    "sessionId": "61200143-57b9-4128-90a2-526754bab094",
-    "timestamp": 1738810144626,
-    "viewType": "table",
-    "initialView": "table",
-    "recorded_at": "2025-02-06T02:49:04.908700"
-  },
-  {
-    "sessionId": "61200143-57b9-4128-90a2-526754bab094",
-    "timestamp": 1738810144632,
-    "viewType": "table",
-    "initialView": "table",
-    "recorded_at": "2025-02-06T02:49:04.919077"
+    "recorded_at": "2025-02-08T04:28:38.825762"
   }
 ]

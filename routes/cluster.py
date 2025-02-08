@@ -6,7 +6,8 @@ from middleware.auth import require_auth
 from models.user import User
 from datetime import datetime, timedelta
 
-bp = Blueprint("cluster", __name__)
+bp = Blueprint("cluster", __name__, url_prefix="/api/clusters")
+
 
 @bp.route("/", methods=["GET"])
 @require_auth()
@@ -22,6 +23,7 @@ def get_user_clusters():
     except Exception as e:
         print(f"Error in get_user_clusters: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 
 @bp.route("/<int:cluster_id>", methods=["GET"])
 @require_auth()
@@ -40,6 +42,7 @@ def get_cluster(cluster_id):
         print(f"Error in get_cluster: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+
 @bp.route("/", methods=["POST"])
 @require_auth()
 def create_cluster():
@@ -52,7 +55,8 @@ def create_cluster():
         data = request.json
         if not data.get("name"):
             return jsonify({"error": "Cluster name is required"}), 400
-
+        print("data")
+        print(data)
         cluster = Cluster(
             name=data["name"],
             description=data.get("description", ""),
@@ -67,6 +71,7 @@ def create_cluster():
         print(f"Error in create_cluster: {str(e)}")
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
 
 @bp.route("/<int:cluster_id>", methods=["PUT"])
 @require_auth()
@@ -94,6 +99,7 @@ def update_cluster(cluster_id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
+
 @bp.route("/<int:cluster_id>", methods=["DELETE"])
 @require_auth()
 def delete_cluster(cluster_id):
@@ -114,6 +120,7 @@ def delete_cluster(cluster_id):
         print(f"Error in delete_cluster: {str(e)}")
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
 
 @bp.route("/<int:cluster_id>/gpu", methods=["POST"])
 @require_auth()
@@ -140,12 +147,18 @@ def add_gpu_to_cluster(cluster_id):
         if not gpu_listing:
             return jsonify({"error": "GPU listing not found"}), 404
 
+        # First create the RentalGPU with only the base GPUListing attributes
         rental_gpu = RentalGPU(
-            id=gpu_listing.id,
-            cluster_id=cluster.id,
-            ssh_keys=data.get("ssh_keys", []),
-            email_enabled=data.get("email_enabled", True)
+            instance_name=gpu_listing.instance_name,
+            configuration_id=gpu_listing.configuration_id,
+            current_price=gpu_listing.current_price,
+            host_id=gpu_listing.host_id,
         )
+
+        # Then set the RentalGPU-specific attributes
+        rental_gpu.cluster_id = cluster.id
+        rental_gpu.ssh_keys = data.get("ssh_keys", [])
+        rental_gpu.email_enabled = data.get("email_enabled", True)
         rental_gpu.users_with_access.append(user)
 
         db.session.add(rental_gpu)
@@ -156,6 +169,7 @@ def add_gpu_to_cluster(cluster_id):
         print(f"Error in add_gpu_to_cluster: {str(e)}")
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
 
 @bp.route("/<int:cluster_id>/gpu/access", methods=["POST"])
 @require_auth()
@@ -174,12 +188,12 @@ def manage_gpu_access(cluster_id):
         user_ids = data.get("user_ids", [])
         action = data.get("action")  # 'grant' or 'revoke'
 
-        if not user_ids or action not in ['grant', 'revoke']:
+        if not user_ids or action not in ["grant", "revoke"]:
             return jsonify({"error": "Invalid request parameters"}), 400
 
         users = User.query.filter(User.id.in_(user_ids)).all()
-        
-        if action == 'grant':
+
+        if action == "grant":
             for user in users:
                 if user not in cluster.rental_gpu.users_with_access:
                     cluster.rental_gpu.users_with_access.append(user)
@@ -194,6 +208,7 @@ def manage_gpu_access(cluster_id):
         print(f"Error in manage_gpu_access: {str(e)}")
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
 
 @bp.route("/<int:cluster_id>/gpu/ssh-keys", methods=["PUT"])
 @require_auth()
