@@ -26,8 +26,8 @@ class User(db.Model):
     # selected_gpus = db.relationship("SelectedGPU", backref=db.backref("user", lazy=True))
     # favorite_gpus = db.relationship("FavoriteGPU", backref=db.backref("user", lazy=True))
 
-    # Add projects relationship
-    projects = db.relationship("Project", backref="user", lazy=True)
+    # Add clusters relationship
+    clusters = db.relationship("Cluster", backref="user", lazy=True)
     
     # Add transactions relationship
     transactions = db.relationship("Transaction", backref="user", lazy=True)
@@ -52,7 +52,7 @@ class User(db.Model):
             "referral_source": self.referral_source,
             "balance": self.balance,
             "stripe_customer_id": self.stripe_customer_id,
-            "projects": [project.to_dict() for project in self.projects],
+            "clusters": [cluster.to_dict() for cluster in self.clusters],
             "transactions": [transaction.to_dict() for transaction in self.transactions]
         }
 

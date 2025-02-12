@@ -5,6 +5,7 @@ from models.gpu_listing import GPUListing, Host, GPUPriceHistory, GPUPricePoint,
 from utils.database import db
 from datetime import datetime
 from sqlalchemy import func
+from utils.cache import memory_cache
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -14,6 +15,7 @@ bp = Blueprint("gpu", __name__, url_prefix="/api/gpu")
 
 
 @bp.route("/get_all", methods=["GET"])
+@memory_cache(expiration=60)  # Cache for 1 minute
 def get_all_gpus():
     try:
         listings = GPUListing.query.join(GPUConfiguration).all()
@@ -141,6 +143,7 @@ def get_paginated_gpus(page_number):
 
 
 @bp.route("/filtered", methods=["GET"])
+@memory_cache(expiration=60)  # Cache for 1 minute
 def get_filtered_gpus():
     try:
         logger.info("Received filter request")
