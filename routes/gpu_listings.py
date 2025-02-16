@@ -7,7 +7,14 @@ from datetime import datetime
 from sqlalchemy import func
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.FileHandler('gpu_listings.log'),
+        logging.StreamHandler()
+    ]
+)
 logger = logging.getLogger(__name__)
 
 bp = Blueprint("gpu", __name__, url_prefix="/api/gpu")
@@ -16,21 +23,26 @@ bp = Blueprint("gpu", __name__, url_prefix="/api/gpu")
 @bp.route("/get_all", methods=["GET"])
 def get_all_gpus():
     try:
+        logger.info("Starting get_all_gpus request")
         listings = GPUListing.query.join(GPUConfiguration).all()
-        print(f"Found {len(listings)} GPU listings")
+        logger.info(f"Found {len(listings)} GPU listings")
         result = [listing.to_dict() for listing in listings]
-        print(f"Converted {len(result)} listings to dict")
+        logger.info(f"Converted {len(result)} listings to dict")
         return jsonify(result)
     except Exception as e:
-        print(f"Error fetching GPUs: {str(e)}")
-        return jsonify({"error": "Failed to fetch GPUs"}), 500
+        logger.error(f"Error in get_all_gpus: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 
 @bp.route("/search", methods=["GET"])
 def search_gpus():
     try:
+        logger.info("Starting search_gpus request")
         query = request.args.get("q", "").strip()
+        logger.info(f"Search query: {query}")
+        
         if not query:
+            logger.info("Empty query, returning empty result")
             return jsonify([])
             
         # Try to extract numeric value from query
@@ -40,8 +52,9 @@ def search_gpus():
             match = re.search(r'\d+', query)
             if match:
                 numeric_value = float(match.group())
-        except:
-            pass
+                logger.info(f"Extracted numeric value: {numeric_value}")
+        except Exception as e:
+            logger.warning(f"Failed to extract numeric value: {str(e)}")
             
         # Search across configuration and listing fields
         search_fields = [
@@ -64,58 +77,48 @@ def search_gpus():
                 GPUConfiguration.memory == numeric_value
             ])
             
-        # Calculate similarity scores for each field
-        gpu_name_sim = func.similarity(GPUConfiguration.gpu_name, query)
-        instance_name_sim = func.similarity(GPUListing.instance_name, query)
-        gpu_vendor_sim = func.similarity(GPUConfiguration.gpu_vendor, query)
-        
-        # Calculate numeric field similarities
-        gpu_memory_sim = func.abs(GPUConfiguration.gpu_memory - numeric_value) if numeric_value is not None else 0
-        price_sim = func.abs(GPUListing.current_price - numeric_value) if numeric_value is not None else 0
-        
-        # Get results ordered by best match
+        # Get results with basic ordering
         listings = GPUListing.query.join(GPUConfiguration).filter(
             db.or_(*conditions)
         ).order_by(
-            db.desc(gpu_name_sim),
-            db.desc(instance_name_sim),
-            db.desc(gpu_vendor_sim),
-            *(
-                [db.desc(-gpu_memory_sim), db.desc(-price_sim)]
-                if numeric_value is not None
-                else []
-            )
+            GPUConfiguration.gpu_score.desc()  # Order by GPU score instead of similarity
         ).limit(50).all()
         
+        logger.info(f"Found {len(listings)} matching GPU listings")
         return jsonify([listing.to_dict() for listing in listings])
     except Exception as e:
-        print(f"Error searching GPUs: {str(e)}")
-        return jsonify({"error": "Failed to search GPUs"}), 500
+        logger.error(f"Error in search_gpus: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 
 @bp.route("/<int:id>", methods=["GET"])
 def get_gpu(id):
     try:
+        logger.info(f"Starting get_gpu request for id {id}")
         listing = GPUListing.query.join(GPUConfiguration).get_or_404(id)
+        logger.info(f"Found GPU listing with id {id}")
         return jsonify(listing.to_dict())
     except Exception as e:
-        print(f"Error fetching GPU {id}: {str(e)}")
-        return jsonify({"error": f"Failed to fetch GPU {id}"}), 500
+        logger.error(f"Error in get_gpu: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 
 @bp.route("/hosts", methods=["GET"])
 def get_hosts():
     try:
+        logger.info("Starting get_hosts request")
         hosts = Host.query.with_entities(Host.name).distinct().all()
+        logger.info(f"Found {len(hosts)} unique hosts")
         return jsonify([host[0] for host in hosts])
     except Exception as e:
-        print(f"Error fetching hosts: {str(e)}")
-        return jsonify({"error": "Failed to fetch hosts"}), 500
+        logger.error(f"Error in get_hosts: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 
 @bp.route("/get_gpus/<int:page_number>", methods=["GET"])
 def get_paginated_gpus(page_number):
     try:
+        logger.info(f"Starting get_paginated_gpus request for page {page_number}")
         per_page = 200
         
         paginated_listings = GPUListing.query.join(GPUConfiguration).order_by(
@@ -123,11 +126,13 @@ def get_paginated_gpus(page_number):
         ).paginate(page=page_number, per_page=per_page, error_out=False)
         
         if not paginated_listings.items and page_number > 1:
+            logger.info(f"No GPU listings found for page {page_number}")
             return jsonify({"error": "Page number exceeds available pages"}), 404
             
         total_gpus = GPUListing.query.count()
         total_pages = (total_gpus + per_page - 1) // per_page
         
+        logger.info(f"Found {len(paginated_listings.items)} GPU listings for page {page_number}")
         return jsonify({
             "gpus": [listing.to_dict() for listing in paginated_listings.items],
             "current_page": page_number,
@@ -136,14 +141,14 @@ def get_paginated_gpus(page_number):
             "gpus_per_page": per_page
         })
     except Exception as e:
-        print(f"Error fetching GPUs for page {page_number}: {str(e)}")
-        return jsonify({"error": f"Failed to fetch GPUs for page {page_number}"}), 500
+        logger.error(f"Error in get_paginated_gpus: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 
 @bp.route("/filtered", methods=["GET"])
 def get_filtered_gpus():
     try:
-        logger.info("Received filter request")
+        logger.info("Starting get_filtered_gpus request")
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 20, type=int)
         
@@ -241,6 +246,7 @@ def get_filtered_gpus():
         # Apply pagination
         paginated_query = query.paginate(page=page, per_page=per_page, error_out=False)
         
+        logger.info(f"Found {len(paginated_query.items)} filtered GPU listings")
         return jsonify({
             'gpus': [gpu.to_dict() for gpu in paginated_query.items],
             'total': total_count,
@@ -249,33 +255,38 @@ def get_filtered_gpus():
         })
         
     except Exception as e:
-        logger.error(f"Error in filtered GPUs: {str(e)}")
-        return jsonify({"error": "Failed to fetch filtered GPUs"}), 500
+        logger.error(f"Error in get_filtered_gpus: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 
 @bp.route("/vendors", methods=["GET"])
 def get_gpu_vendors():
     try:
+        logger.info("Starting get_gpu_vendors request")
         vendors = db.session.query(GPUConfiguration.gpu_vendor).distinct().all()
+        logger.info(f"Found {len(vendors)} unique GPU vendors")
         return jsonify([vendor[0] for vendor in vendors if vendor[0]])
     except Exception as e:
-        print(f"Error fetching GPU vendors: {str(e)}")
-        return jsonify({"error": "Failed to fetch GPU vendors"}), 500
+        logger.error(f"Error in get_gpu_vendors: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 
 @bp.route("/gpu_types", methods=["GET"])
 def get_gpu_types():
     try:
+        logger.info("Starting get_gpu_types request")
         types = db.session.query(GPUConfiguration.gpu_name).distinct().all()
+        logger.info(f"Found {len(types)} unique GPU types")
         return jsonify([type[0] for type in types if type[0]])
     except Exception as e:
-        print(f"Error fetching GPU types: {str(e)}")
-        return jsonify({"error": "Failed to fetch GPU types"}), 500
+        logger.error(f"Error in get_gpu_types: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 
 @bp.route("/<int:gpu_id>/price_history", methods=["GET"])
 def get_gpu_price_history(gpu_id):
     try:
+        logger.info(f"Starting get_gpu_price_history request for GPU {gpu_id}")
         # Get the GPU listing and its configuration
         listing = GPUListing.query.get_or_404(gpu_id)
         config_id = listing.configuration_id
@@ -310,17 +321,20 @@ def get_gpu_price_history(gpu_id):
         # Sort by date
         chart_data.sort(key=lambda x: x['date'])
         
+        logger.info(f"Found {len(chart_data)} price history records for GPU {gpu_id}")
         return jsonify(chart_data)
     except Exception as e:
-        print(f"Error fetching price history for GPU {gpu_id}: {str(e)}")
-        return jsonify({"error": f"Failed to fetch price history for GPU {gpu_id}"}), 500
+        logger.error(f"Error in get_gpu_price_history: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 
 @bp.route("/<int:gpu_id>/price_points", methods=["GET"])
 def get_gpu_price_points(gpu_id):
     try:
+        logger.info(f"Starting get_gpu_price_points request for GPU {gpu_id}")
         points = GPUPricePoint.query.filter_by(gpu_listing_id=gpu_id).all()
+        logger.info(f"Found {len(points)} price points for GPU {gpu_id}")
         return jsonify([point.to_dict() for point in points])
     except Exception as e:
-        print(f"Error fetching price points for GPU {gpu_id}: {str(e)}")
-        return jsonify({"error": f"Failed to fetch price points for GPU {gpu_id}"}), 500
+        logger.error(f"Error in get_gpu_price_points: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
