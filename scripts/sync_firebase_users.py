@@ -22,14 +22,19 @@ def initialize_firebase():
 def get_all_firebase_users():
     """Retrieve all users from Firebase."""
     users = []
-    page = None
+    page_token = None
     while True:
         try:
-            result = auth.list_users(page_token=page)
+            # Get next batch of users
+            result = auth.list_users(max_results=1000, page_token=page_token)
             users.extend(result.users)
-            if not result.page_token:
+            
+            # Get next page token
+            page_token = result.next_page_token
+            
+            # If no more pages, break
+            if not page_token:
                 break
-            page = result.page_token
         except Exception as e:
             print(f"Error fetching Firebase users: {e}")
             break
