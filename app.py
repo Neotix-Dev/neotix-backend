@@ -4,6 +4,7 @@ from utils.database import db, init_db
 from routes.user_preferences import bp as user_preferences_bp
 from routes.gpu_listings import bp as gpu_bp
 from routes.user import bp as user_bp
+from routes.api import bp as api_bp
 from routes.cluster import bp as cluster_bp
 from routes.transactions import bp as transactions_bp
 from routes.analytics import bp as analytics_bp
@@ -107,6 +108,8 @@ def create_app(environ=None, start_response=None):
     app.register_blueprint(user_preferences_bp, url_prefix="/api/user-preferences")
     app.register_blueprint(gpu_bp, url_prefix="/api/gpu")
     app.register_blueprint(user_bp, url_prefix="/api/user")
+    app.register_blueprint(api_bp, url_prefix="/api")
+    
     app.register_blueprint(cluster_bp, url_prefix="/api/clusters")
     app.register_blueprint(transactions_bp, url_prefix="/api/transactions")
     app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
