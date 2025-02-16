@@ -2,7 +2,7 @@ import pytest
 from app import create_app
 from utils.database import db
 from models.user import User
-from models.project import Project
+from models.cluster import Cluster
 from models.gpu_listing import GPUListing, Host
 from datetime import datetime
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -136,14 +136,14 @@ def test_user(session):
 
 
 @pytest.fixture
-def test_project(session, test_user):
-    """Create a test project."""
-    project = Project(
-        name="Test Project", description="Test Description", user_id=test_user.id
+def test_cluster(session, test_user):
+    """Create a test cluster."""
+    cluster = Cluster(
+        name="Test Cluster", description="Test Description", user_id=test_user.id
     )
-    session.add(project)
+    session.add(cluster)
     session.commit()
-    return project
+    return cluster
 
 
 @pytest.fixture
