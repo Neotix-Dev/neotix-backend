@@ -102,6 +102,62 @@ Most endpoints require Firebase authentication token in the `Authorization` head
   - Required: gpuId/gpuType, targetPrice, isTypeAlert
 - `DELETE /price-alerts/<alert_id>` - Remove price alert
 
+### A/B Testing (`/api/analytics`)
+
+The backend implements A/B testing functionality to track and analyze user preferences between different view types (grid vs. table view).
+
+#### View Preference Tracking
+- `POST /view-preference` - Record user view preference
+  - Required payload:
+    ```json
+    {
+      "sessionId": "unique_session_id",
+      "timestamp": "ISO timestamp",
+      "viewType": "grid|table",
+      "initialView": "grid|table"
+    }
+    ```
+
+#### Analytics
+- `GET /view-preference/summary` - Get summary of view preferences
+  - Returns:
+    ```json
+    {
+      "total_sessions": "number of unique sessions",
+      "view_preferences": {
+        "grid": "number of users who preferred grid view",
+        "table": "number of users who preferred table view"
+      },
+      "conversion_rates": {
+        "grid": "percentage who stayed with grid view",
+        "table": "percentage who stayed with table view"
+      }
+    }
+    ```
+
+#### Implementation Details
+- Users are randomly assigned either grid or table view on their first visit
+- The system tracks:
+  - Initial view type assigned
+  - View type changes during the session
+  - Final view type preference
+- Analytics are stored in JSON format at `data/analytics/view_preferences.json`
+
+#### Setup Instructions
+1. Ensure the `data/analytics` directory exists:
+   ```bash
+   mkdir -p data/analytics
+   ```
+2. Initialize the analytics file:
+   ```bash
+   echo "[]" > data/analytics/view_preferences.json
+   ```
+3. Ensure write permissions:
+   ```bash
+   chmod 644 data/analytics/view_preferences.json
+   ```
+All the analytics data is stored in `data/analytics/view_preferences.json`.
+
 ### Response Format
 All endpoints return JSON with standard structure:
 - Success: `{ data: [result] }`
