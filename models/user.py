@@ -17,8 +17,10 @@ class User(db.Model):
     last_name = db.Column(db.String(255), nullable=False)
     experience_level = db.Column(db.String(50), default="beginner")
     referral_source = db.Column(db.String(50), default="")
-    balance = db.Column(db.Float, default=0.0)  # User's balance in dollars
     stripe_customer_id = db.Column(db.String(255), unique=True)  # Stripe customer ID for saved payment methods
+
+    # Add balance field
+    balance = db.Column(db.Float, default=0.0)  # User's balance in dollars
 
     # Relationships with preference models
     # rented_gpus = db.relationship("RentedGPU", backref=db.backref("user", lazy=True))
