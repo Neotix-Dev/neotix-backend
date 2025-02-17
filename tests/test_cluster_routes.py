@@ -56,30 +56,32 @@ def test_delete_cluster(client, auth_headers, test_cluster):
         f"/api/clusters/{test_cluster.id}",
         headers=auth_headers
     )
-    assert response.status_code == 200
-    data = response.get_json()
-    assert data['message'] == 'Cluster deleted successfully'
+    assert response.status_code == 204
+    get_response = client.get(
+        f"/api/clusters/{test_cluster.id}",
+        headers=auth_headers
+    )
+    assert get_response.status_code == 404
 
 @pytest.mark.usefixtures("mock_firebase")
 def test_add_gpu_to_cluster(client, auth_headers, test_cluster, test_gpu):
     """Test adding a GPU to a cluster."""
     response = client.post(
-        f"/api/clusters/{test_cluster.id}/gpus",
-        headers=auth_headers,
-        json={"gpu_id": test_gpu.id}
+        f"/api/clusters/{test_cluster.id}/gpus/{test_gpu.id}",
+        headers=auth_headers
     )
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.get_json()
-    assert test_gpu.id in [gpu['id'] for gpu in data['gpus']]
+    assert data['id'] == test_cluster.id
+    assert any(gpu['id'] == test_gpu.id for gpu in data['gpus'])
 
 @pytest.mark.usefixtures("mock_firebase")
 def test_remove_gpu_from_cluster(client, auth_headers, test_cluster, test_gpu):
     """Test removing a GPU from a cluster."""
     # First add the GPU
     client.post(
-        f"/api/clusters/{test_cluster.id}/gpus",
-        headers=auth_headers,
-        json={"gpu_id": test_gpu.id}
+        f"/api/clusters/{test_cluster.id}/gpus/{test_gpu.id}",
+        headers=auth_headers
     )
     
     # Then remove it
@@ -87,9 +89,15 @@ def test_remove_gpu_from_cluster(client, auth_headers, test_cluster, test_gpu):
         f"/api/clusters/{test_cluster.id}/gpus/{test_gpu.id}",
         headers=auth_headers
     )
-    assert response.status_code == 200
-    data = response.get_json()
-    assert test_gpu.id not in [gpu['id'] for gpu in data['gpus']]
+    assert response.status_code == 204
+
+    # Verify GPU is removed
+    get_response = client.get(
+        f"/api/clusters/{test_cluster.id}",
+        headers=auth_headers
+    )
+    data = get_response.get_json()
+    assert not any(gpu['id'] == test_gpu.id for gpu in data['gpus'])
 
 @pytest.mark.usefixtures("mock_firebase")
 def test_cluster_not_found(client, auth_headers):
