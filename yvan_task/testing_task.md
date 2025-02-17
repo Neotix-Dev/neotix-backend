@@ -92,10 +92,23 @@ By the end of the week, you should have:
 - Document questions that the AI couldn't answer clearly
 - Focus on learning how to effectively communicate with the AI
 
-Remember: The goal isn't just to write tests, but to:
-1. Learn the codebase thoroughly
-2. Master AI-assisted development
-3. Identify areas for improvement
-4. Practice working with incomplete information
+## CI/CD Implementation
+
+A critical part of this testing task is implementing a robust CI/CD pipeline. You will need to:
+
+1. Research and choose appropriate CI/CD tools (e.g., GitHub Actions, GitLab CI, Jenkins)
+2. Design and implement a pipeline that:
+   - Automatically runs all tests on each commit
+   - Performs code quality checks
+   - Generates test coverage reports
+   - Manages deployments effectively
+
+This is entirely your responsibility to research, design, and implement. The goal is to demonstrate your ability to:
+- Set up automated testing infrastructure
+- Implement industry best practices for continuous integration
+- Ensure code quality through automated checks
+- Document your CI/CD implementation decisions
+
+Take initiative in exploring different CI/CD solutions and choose what you think works best for this project. This is an opportunity to showcase your DevOps skills and understanding of modern development practices.
 
 Good luck! Start by setting up your environment and don't hesitate to ask the AI any questions you have along the way.

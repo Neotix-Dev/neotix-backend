@@ -30,7 +30,8 @@ Find out how to set up on Windows.
 DATABASE_URI=postgresql://postgres:postgres@localhost:5432/neotix
 ```
 5. Now run the script 'setup_postgres.py' in the scripts folder.
-   
+
+> Note: We have not yet tested this on a Windows machine. So, if you are on a Windows computer, read the file carefully then figure out how to create the database manually. 
 
 5. Initialize the database:
 ```bash
