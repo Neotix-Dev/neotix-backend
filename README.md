@@ -42,12 +42,17 @@ flask db upgrade
 ```bash
 flask run
 ```
+In parallel, run the command:
 
 7. Fetch GPU data:
 ```bash
 flask fetch-gpu-data
 ```
-
+If it does not work on the get go. Run,
+```bash
+git clone https://github.com/Neotix-Dev/gpuhunt.git
+``` 
+As the gpuhunt repo is not automatically downloaded. Re-run the command `flask fetch-gpu-data` again.
 ## API Documentation
 
 ### Authentication
