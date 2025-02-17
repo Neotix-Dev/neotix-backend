@@ -3,12 +3,13 @@ from app import create_app
 from utils.database import db
 from models.user import User
 from models.cluster import Cluster
-from models.gpu_listing import GPUListing, Host
-from datetime import datetime
+from models.gpu_listing import GPUListing, Host, GPUConfiguration
+from datetime import datetime, timezone
 from sqlalchemy.orm import sessionmaker, scoped_session
 from unittest.mock import patch, MagicMock
 import jwt
 import time
+import hashlib
 
 
 class MockFirebaseUser:
@@ -113,22 +114,19 @@ def auth_headers(mock_firebase):
 @pytest.fixture
 def test_user(session):
     """Create a test user."""
-    # First clean up any existing user
-    session.query(User).filter_by(firebase_uid="test_user_id").delete()
-    session.commit()
-
-    # Create new user
     user = User(
         firebase_uid="test_user_id",
         email="test@example.com",
         first_name="Test",
         last_name="User",
-        organization="Test Org",
-        experience_level="intermediate",
         email_verified=True,
         disabled=False,
-        created_at=datetime.utcnow(),
-        last_login=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
+        last_login=datetime.now(timezone.utc),
+        organization="Test Org",
+        experience_level="intermediate",
+        referral_source="friend",
+        balance=0.0
     )
     session.add(user)
     session.commit()
@@ -150,7 +148,9 @@ def test_cluster(session, test_user):
 def test_host(session):
     """Create a test host."""
     host = Host(
-        name="Test Host", description="Test Host Description", url="https://test.host"
+        name="test-host",
+        description="Test Host Provider",
+        url="https://test-host.com"
     )
     session.add(host)
     session.commit()
@@ -158,19 +158,39 @@ def test_host(session):
 
 
 @pytest.fixture
-def test_gpu(session, test_host):
+def test_gpu_config(session):
+    """Create a test GPU configuration."""
+    config_dict = {
+        "gpu_name": "Test GPU",
+        "gpu_vendor": "NVIDIA",
+        "gpu_count": 1,
+        "gpu_memory": 8.0,
+        "cpu": 8,
+        "memory": 32.0,
+        "disk_size": 100.0
+    }
+    
+    # Create a hash of the configuration
+    hash_input = "".join(str(v) for v in config_dict.values())
+    config_hash = hashlib.sha256(hash_input.encode()).hexdigest()
+    
+    config = GPUConfiguration(
+        hash=config_hash,
+        **config_dict
+    )
+    session.add(config)
+    session.commit()
+    return config
+
+
+@pytest.fixture
+def test_gpu(session, test_host, test_gpu_config):
     """Create a test GPU listing."""
     gpu = GPUListing(
         instance_name="test-instance",
-        gpu_name="Test GPU",
-        gpu_vendor="NVIDIA",
-        gpu_count=1,
-        gpu_memory=8.0,
+        configuration_id=test_gpu_config.id,
         current_price=1.0,
-        cpu=8,
-        memory=32.0,
-        disk_size=100.0,
-        host_id=test_host.id,
+        host_id=test_host.id
     )
     session.add(gpu)
     session.commit()
