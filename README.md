@@ -21,6 +21,7 @@ sudo pacman -S postgresql
 ```
 
 Note: These are for linux, if on mac, pacman will not work. You will have to use brew.
+Find out how to set up on Windows. 
 
 
 
