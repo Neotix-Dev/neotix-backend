@@ -8,7 +8,8 @@ from routes.cluster import bp as cluster_bp
 from routes.transactions import bp as transactions_bp
 from routes.analytics import bp as analytics_bp
 from models.user import User
-from models.cluster import Cluster, RentalGPU
+from models.cluster import Cluster
+from models.rental_gpu import RentalGPU
 from models.gpu_listing import GPUListing
 from models.transaction import Transaction
 from commands.fetch_gpu_data import fetch_gpu_data_command
