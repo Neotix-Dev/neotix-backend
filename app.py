@@ -88,12 +88,13 @@ def create_app(environ=None, start_response=None):
     except Exception as e:
         logger.warning(f"Could not verify instance path is writable: {e}")
 
-    # Configure SQLite database with absolute path
+    # Configure database
     app.config.from_object(Config)
+    # Override the database URI directly
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:postgres@localhost:5432/neotix"
 
     # Debug: Print configuration
     logger.info("Database URI: %s", app.config.get("SQLALCHEMY_DATABASE_URI"))
-    logger.info("Environment DATABASE_URI: %s", os.getenv("DATABASE_URI"))
 
     # Initialize database
     db.init_app(app)

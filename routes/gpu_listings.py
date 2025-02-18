@@ -151,8 +151,8 @@ def get_paginated_gpus(page_number):
 def get_filtered_gpus():
     try:
         logger.info("Starting get_filtered_gpus request")
-        page = request.args.get("page", type=int)
-        per_page = request.args.get("per_page", type=int)
+        page = request.args.get("page", 1, type=int)
+        per_page = request.args.get("per_page", 20, type=int)
         
         logger.info(f"Request args: {dict(request.args)}")
         
