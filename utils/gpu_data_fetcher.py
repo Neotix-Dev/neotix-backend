@@ -37,6 +37,7 @@ def fetch_gpu_data():
     # Log unique providers at the start
     providers = set(offer.provider for offer in offers if offer.gpu_count and offer.gpu_count >= 1)
     logger.info(f"Found providers: {', '.join(providers)}")
+    logger.info(f"Total number of offers received: {len(offers)}")
     
     current_provider = None
     processed_gpus = 0
@@ -48,13 +49,14 @@ def fetch_gpu_data():
             continue
             
         # Log when switching to a new provider
-        if current_provider != offer.provider:
-            current_provider = offer.provider
-            logger.info(f"Fetching GPU data from provider: {current_provider}")
+        # if current_provider != offer.provider:
+        #     current_provider = offer.provider
+        #     # logger.info(f"Processing provider: {current_provider}")
             
         # Get or create host
         host = Host.query.filter_by(name=offer.provider).first()
         if not host:
+            # logger.info(f"Creating new host entry for provider: {offer.provider}")
             host = Host(
                 name=offer.provider,
                 description=f"GPU provider: {offer.provider}",
@@ -62,6 +64,7 @@ def fetch_gpu_data():
             )
             db.session.add(host)
             db.session.flush()
+            # logger.info(f"Created host with ID: {host.id}")
         
         active_providers.add(host.name)
         
@@ -69,6 +72,7 @@ def fetch_gpu_data():
         config_hash = hash_gpu_configuration(offer)
         config = GPUConfiguration.query.filter_by(hash=config_hash).first()
         if not config:
+            # logger.info(f"Creating new GPU configuration for {offer.gpu_name} (Count: {offer.gpu_count})")
             config = GPUConfiguration(
                 hash=config_hash,
                 gpu_name=offer.gpu_name,
@@ -81,6 +85,7 @@ def fetch_gpu_data():
             )
             db.session.add(config)
             db.session.flush()
+            # logger.info(f"Created configuration with ID: {config.id}")
         
         # Create new listing
         gpu_listing = GPUListing(
@@ -92,6 +97,7 @@ def fetch_gpu_data():
         gpu_listing.price_change = "N/A"
         db.session.add(gpu_listing)
         db.session.flush()
+        # logger.info(f"Created GPU listing with ID: {gpu_listing.id} for instance {offer.instance_name}")
         
         # Update or create price point
         price_point = GPUPricePoint.query.filter_by(
@@ -101,11 +107,11 @@ def fetch_gpu_data():
         ).first()
         
         if price_point:
-            # Update existing price point
+            # logger.info(f"Updating existing price point for listing {gpu_listing.id}")
             price_point.price = offer.price
             price_point.last_updated = current_time
         else:
-            # Create new price point
+            # logger.info(f"Creating new price point for listing {gpu_listing.id}")
             price_point = GPUPricePoint(
                 gpu_listing_id=gpu_listing.id,
                 price=offer.price,
@@ -127,8 +133,10 @@ def fetch_gpu_data():
         
         # Increment processed GPUs counter and log progress
         processed_gpus += 1
-        if processed_gpus % 100 == 0:
+        if processed_gpus % 1000 == 0:  
             logger.info(f"Processed {processed_gpus} GPUs...")
+            # Add periodic flush to ensure data is being written
+            db.session.flush()
     
     # Log completion with provider summary
     logger.info(f"GPU data fetch completed. Total GPUs processed: {processed_gpus}")
@@ -136,9 +144,12 @@ def fetch_gpu_data():
     
     # Commit all changes
     try:
+        logger.info("Attempting to commit all changes to database...")
         db.session.commit()
-        logger.info("Successfully saved all GPU data to database")
+        logger.info("Successfully committed all GPU data to database")
+        logger.info("Database URI: %s", db.engine.url)
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error saving GPU data to database: {str(e)}")
+        logger.error(f"Database URI: {db.engine.url}")
         raise e
