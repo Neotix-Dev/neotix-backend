@@ -207,3 +207,36 @@ def remove_gpu_from_cluster(cluster_id):
         db.session.rollback()
         print(f"Error in remove_gpu_from_cluster: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+@bp.route("/<int:cluster_id>", methods=["DELETE"])
+@require_auth()
+def delete_cluster(cluster_id):
+    """Delete a cluster if it has no active rentals"""
+    try:
+        user = User.query.filter_by(firebase_uid=g.user_id).first()
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        cluster = Cluster.query.get(cluster_id)
+        if not cluster:
+            return jsonify({"error": "Cluster not found"}), 404
+
+        if cluster.user_id != user.id:
+            return jsonify({"error": "Unauthorized"}), 403
+
+        # Check if cluster has active rentals
+        active_rental = cluster.active_rental
+        if active_rental:
+            return jsonify({"error": "Cannot delete cluster with active rentals"}), 400
+
+        # Delete the cluster and its rental history
+        db.session.delete(cluster)
+        db.session.commit()
+
+        return jsonify({"message": "Cluster deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error in delete_cluster: {str(e)}")
+        return jsonify({"error": str(e)}), 500
