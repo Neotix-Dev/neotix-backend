@@ -31,3 +31,6 @@ firebase-admin==6.2.0
 
 #web scraper
 beautifulsoup4>=4.12.2
+
+# payments 
+stripe
