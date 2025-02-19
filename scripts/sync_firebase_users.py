@@ -24,20 +24,27 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI", "postgresql://
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
-def initialize_firebase():
-    """Initialize Firebase Admin SDK"""
-    try:
-        if not firebase_admin._apps:
-            cred_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "firebaseKey.json")
-            if not os.path.exists(cred_path):
-                raise FileNotFoundError(f"Firebase credentials file not found at {cred_path}")
+def get_all_firebase_users():
+    """Retrieve all users from Firebase."""
+    users = []
+    page_token = None
+    while True:
+        try:
+            # Get next batch of users
+            result = auth.list_users(max_results=1000, page_token=page_token)
+            users.extend(result.users)
             
-            cred = credentials.Certificate(cred_path)
-            firebase_admin.initialize_app(cred)
-            print("Firebase initialized successfully")
-    except Exception as e:
-        print(f"Error initializing Firebase: {str(e)}")
-        sys.exit(1)
+            # Get next page token
+            page_token = result.next_page_token
+            
+            # If no more pages, break
+            if not page_token:
+                break
+        except Exception as e:
+            print(f"Error fetching Firebase users: {e}")
+            break
+    return users
+
 
 def get_firebase_users():
     """Retrieve all users from Firebase"""
