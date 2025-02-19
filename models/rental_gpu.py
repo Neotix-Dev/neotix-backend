@@ -31,7 +31,7 @@ class RentalGPU(db.Model):
     updated_at = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
-
+    price = db.Column(db.Float, nullable=False)
     # Relationships
     cluster = db.relationship("Cluster", back_populates="rental_history")
     gpu_listing = db.relationship("GPUListing")
@@ -43,6 +43,7 @@ class RentalGPU(db.Model):
         gpu_listing_id,
         user_id,
         configuration,
+        price,
         ssh_keys=None,
         email_enabled=True,
     ):
@@ -50,27 +51,50 @@ class RentalGPU(db.Model):
         self.gpu_listing_id = gpu_listing_id
         self.user_id = user_id
         self.configuration = configuration
+        self.price = price
         self.ssh_keys = ssh_keys or []
         self.email_enabled = email_enabled
+
+    def update_status(self):
+        """Update the rental status based on current time"""
+        now = datetime.utcnow()
+        if self.end_time and now > self.end_time:
+            self.status = "completed"
+            db.session.commit()
+        return self.status
 
     def to_dict(self):
         """Convert rental to dictionary representation"""
         gpu = self.gpu_listing
         gpu_config = gpu.configuration if gpu else None
-        
+
         # Format times with UTC timezone
-        start_time = self.start_time.strftime('%Y-%m-%dT%H:%M:%S+00:00') if self.start_time else None
-        end_time = self.end_time.strftime('%Y-%m-%dT%H:%M:%S+00:00') if self.end_time else None
-        created_at = self.created_at.strftime('%Y-%m-%dT%H:%M:%S+00:00') if self.created_at else None
-        updated_at = self.updated_at.strftime('%Y-%m-%dT%H:%M:%S+00:00') if self.updated_at else None
-        
+        start_time = (
+            self.start_time.strftime("%Y-%m-%dT%H:%M:%S+00:00")
+            if self.start_time
+            else None
+        )
+        end_time = (
+            self.end_time.strftime("%Y-%m-%dT%H:%M:%S+00:00") if self.end_time else None
+        )
+        created_at = (
+            self.created_at.strftime("%Y-%m-%dT%H:%M:%S+00:00")
+            if self.created_at
+            else None
+        )
+        updated_at = (
+            self.updated_at.strftime("%Y-%m-%dT%H:%M:%S+00:00")
+            if self.updated_at
+            else None
+        )
+
         return {
             "id": self.id,
             "cluster_id": self.cluster_id,
             "gpu_listing_id": self.gpu_listing_id,
             "user_id": self.user_id,
             "configuration": self.configuration,
-            "status": self.status,
+            "status": self.update_status(),  # Get current status
             "ssh_keys": self.ssh_keys,
             "email_enabled": self.email_enabled,
             "start_time": start_time,
@@ -82,7 +106,7 @@ class RentalGPU(db.Model):
             "gpu_vendor": gpu_config.gpu_vendor if gpu_config else None,
             "gpu_memory": gpu_config.gpu_memory if gpu_config else None,
             "gpu_count": gpu_config.gpu_count if gpu_config else None,
-            "current_price": gpu.current_price if gpu else None,
+            "price": self.price,
             "provider": gpu.host.name if gpu and gpu.host else None,
         }
 
