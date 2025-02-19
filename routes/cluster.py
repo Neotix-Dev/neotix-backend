@@ -157,6 +157,13 @@ def deploy_cluster_gpu(cluster_id):
         if cluster.user_id != user.id:
             return jsonify({"error": "Unauthorized"}), 403
 
+        gpu_config = cluster.current_gpu
+        if not gpu_config:
+            return jsonify({"error": "No GPU configured in cluster"}), 400
+
+        gpu = GPUListing.query.get(gpu_config.id)
+        if not gpu:
+            return jsonify({"error": "GPU not found"}), 404
         data = request.get_json() or {}
         rental_gpu = cluster.deploy_current_gpu(
             ssh_keys=data.get("ssh_keys", []),
@@ -206,6 +213,29 @@ def remove_gpu_from_cluster(cluster_id):
     except Exception as e:
         db.session.rollback()
         print(f"Error in remove_gpu_from_cluster: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@bp.route("/<int:cluster_id>/history", methods=["GET"])
+@require_auth()
+def get_cluster_history(cluster_id):
+    """Get rental history for a specific cluster"""
+    try:
+        user = User.query.filter_by(firebase_uid=g.user_id).first()
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        cluster = Cluster.query.filter_by(id=cluster_id, user_id=user.id).first()
+        if not cluster:
+            return jsonify({"error": "Cluster not found"}), 404
+
+        rental_history = cluster.rental_history.order_by(
+            RentalGPU.start_time.desc()
+        ).all()
+        return jsonify([rental.to_dict() for rental in rental_history]), 200
+
+    except Exception as e:
+        print(f"Error fetching cluster history: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 

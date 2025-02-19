@@ -24,6 +24,25 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI", "postgresql://
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
+def initialize_firebase():
+    """Initialize Firebase Admin SDK"""
+    try:
+        # Check if already initialized
+        if not firebase_admin._apps:
+            cred_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "firebaseKey.json")
+            
+            if not os.path.exists(cred_path):
+                raise FileNotFoundError(f"Firebase credentials file not found at: {cred_path}")
+            
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred)
+            print("Firebase initialized successfully")
+        else:
+            print("Firebase already initialized")
+    except Exception as e:
+        print(f"Error initializing Firebase: {str(e)}")
+        sys.exit(1)
+
 def get_all_firebase_users():
     """Retrieve all users from Firebase."""
     users = []
@@ -45,16 +64,6 @@ def get_all_firebase_users():
             break
     return users
 
-
-def get_firebase_users():
-    """Retrieve all users from Firebase"""
-    try:
-        result = auth.list_users()
-        return result.users
-    except Exception as e:
-        print(f"Error fetching Firebase users: {str(e)}")
-        return []
-
 def sync_users():
     """Sync Firebase users with local database"""
     with app.app_context():
@@ -65,7 +74,7 @@ def sync_users():
             initialize_firebase()
             
             # Get Firebase users
-            firebase_users = get_firebase_users()
+            firebase_users = get_all_firebase_users()
             print(f"Found {len(firebase_users)} users in Firebase")
             
             # Track sync statistics
@@ -127,13 +136,18 @@ def sync_users():
                     stats["errors"] += 1
                     continue
             
-            # Commit all changes
-            db.session.commit()
-            
-            print("\nSync completed!")
-            print(f"Created: {stats['created']}")
-            print(f"Updated: {stats['updated']}")
-            print(f"Errors: {stats['errors']}")
+            try:
+                # Commit all changes
+                db.session.commit()
+                
+                print("\nSync completed!")
+                print(f"Created: {stats['created']}")
+                print(f"Updated: {stats['updated']}")
+                print(f"Errors: {stats['errors']}")
+            except Exception as e:
+                print(f"Error committing changes: {str(e)}")
+                db.session.rollback()
+                sys.exit(1)
             
         except Exception as e:
             print(f"Error during sync: {str(e)}")

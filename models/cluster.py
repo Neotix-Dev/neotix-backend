@@ -1,6 +1,7 @@
 from utils.database import db
 from datetime import datetime
 from models.gpu_listing import GPUListing
+from models.rental_gpu import RentalGPU
 from datetime import timedelta
 
 
@@ -33,11 +34,16 @@ class Cluster(db.Model):
     @property
     def active_rental(self):
         """Get the currently active GPU rental for this cluster, if any"""
-        return self.rental_history.filter_by(status="active").first()
+        now = datetime.utcnow()
+        return self.rental_history.filter(
+            db.and_(
+                RentalGPU.status == "active",
+                db.or_(RentalGPU.end_time.is_(None), RentalGPU.end_time > now),
+            )
+        ).first()
 
     def deploy_current_gpu(self, ssh_keys=None, email_enabled=True, duration_hours=24):
         """Deploy the current GPU, converting it to a rental"""
-        from models.rental_gpu import RentalGPU  # Import here to avoid circular imports
 
         if not self.current_gpu:
             raise ValueError("No GPU assigned to deploy")
@@ -53,6 +59,7 @@ class Cluster(db.Model):
             cluster_id=self.id,
             gpu_listing_id=self.current_gpu_id,
             user_id=self.user_id,
+            price=gpu.current_price,
             configuration={
                 "gpu_name": config.gpu_name if config else None,
                 "gpu_vendor": config.gpu_vendor if config else None,
@@ -83,6 +90,10 @@ class Cluster(db.Model):
         """Convert cluster to dictionary representation"""
         active_rental = self.active_rental
         current_gpu = self.current_gpu.to_dict() if self.current_gpu else None
+        rental_history = [
+            rental.to_dict()
+            for rental in self.rental_history.order_by(RentalGPU.start_time.desc())
+        ]
 
         return {
             "id": self.id,
@@ -93,4 +104,5 @@ class Cluster(db.Model):
             "user_id": self.user_id,
             "current_gpu": current_gpu,
             "rental_gpu": active_rental.to_dict() if active_rental else None,
+            "rental_history": rental_history,
         }
