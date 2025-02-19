@@ -28,11 +28,11 @@ class User(db.Model):
     # selected_gpus = db.relationship("SelectedGPU", backref=db.backref("user", lazy=True))
     # favorite_gpus = db.relationship("FavoriteGPU", backref=db.backref("user", lazy=True))
 
-    # Add clusters relationship
-    clusters = db.relationship("Cluster", backref="user", lazy=True)
-    
-    # Add transactions relationship
-    transactions = db.relationship("Transaction", backref="user", lazy=True)
+
+    # Define relationships using strings to avoid circular imports
+    clusters = db.relationship("Cluster", backref=db.backref("user", lazy=True))
+    transactions = db.relationship("Transaction", backref=db.backref("user", lazy=True))
+    rental_gpus = db.relationship("RentalGPU", back_populates="user", lazy=True)
 
     def __repr__(self):
         return f"<User {self.email}>"
@@ -52,10 +52,7 @@ class User(db.Model):
             "last_name": self.last_name,
             "experience_level": self.experience_level,
             "referral_source": self.referral_source,
-            "balance": self.balance,
-            "stripe_customer_id": self.stripe_customer_id,
-            "clusters": [cluster.to_dict() for cluster in self.clusters],
-            "transactions": [transaction.to_dict() for transaction in self.transactions]
+            "balance": self.balance
         }
 
     @staticmethod
