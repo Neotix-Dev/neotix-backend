@@ -54,5 +54,20 @@
     "viewType": "table",
     "initialView": "table",
     "recorded_at": "2025-02-18T20:55:26.087281"
+
+  },
+  {
+    "sessionId": "bb38cc71-2d47-4270-8c30-40a1e7aaffd4",
+    "timestamp": 1739905081518,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-02-18T18:58:01.539836"
+  },
+  {
+    "sessionId": "bb38cc71-2d47-4270-8c30-40a1e7aaffd4",
+    "timestamp": 1739905603781,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-02-18T19:06:43.803444"
   }
 ]
