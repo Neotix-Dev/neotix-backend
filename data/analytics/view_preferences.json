@@ -54,5 +54,54 @@
     "viewType": "table",
     "initialView": "table",
     "recorded_at": "2025-02-21T17:03:46.341840"
+  },
+  {
+    "sessionId": "bb38cc71-2d47-4270-8c30-40a1e7aaffd4",
+    "timestamp": 1740158871224,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-02-21T17:27:51.409562"
+  },
+  {
+    "sessionId": "bb38cc71-2d47-4270-8c30-40a1e7aaffd4",
+    "timestamp": 1740158871225,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-02-21T17:27:51.962374"
+  },
+  {
+    "sessionId": "bb38cc71-2d47-4270-8c30-40a1e7aaffd4",
+    "timestamp": 1740159091043,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-02-21T17:31:31.078386"
+  },
+  {
+    "sessionId": "bb38cc71-2d47-4270-8c30-40a1e7aaffd4",
+    "timestamp": 1740159310292,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-02-21T17:35:10.319021"
+  },
+  {
+    "sessionId": "bb38cc71-2d47-4270-8c30-40a1e7aaffd4",
+    "timestamp": 1740159746746,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-02-21T17:42:26.762100"
+  },
+  {
+    "sessionId": "bb38cc71-2d47-4270-8c30-40a1e7aaffd4",
+    "timestamp": 1740159825534,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-02-21T17:43:45.554617"
+  },
+  {
+    "sessionId": "bb38cc71-2d47-4270-8c30-40a1e7aaffd4",
+    "timestamp": 1740160719751,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-02-21T17:58:39.781867"
   }
 ]
