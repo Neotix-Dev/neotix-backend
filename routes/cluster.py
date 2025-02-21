@@ -3,9 +3,12 @@ from models.cluster import Cluster
 from models.rental_gpu import RentalGPU
 from models.gpu_listing import GPUListing
 from models.user import User
+from models.transaction import Transaction
+from models.deployment_cost import DeploymentCost
 from utils.database import db
 from middleware.auth import auth_required, require_auth
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 bp = Blueprint("clusters", __name__)
 
@@ -164,17 +167,83 @@ def deploy_cluster_gpu(cluster_id):
         gpu = GPUListing.query.get(gpu_config.id)
         if not gpu:
             return jsonify({"error": "GPU not found"}), 404
+
         data = request.get_json() or {}
-        rental_gpu = cluster.deploy_current_gpu(
-            ssh_keys=data.get("ssh_keys", []),
-            email_enabled=data.get("email_enabled", True),
-            duration_hours=data.get("duration_hours", 24),
-        )
+        duration_hours = data.get("duration_hours", 24)
 
-        db.session.add(rental_gpu)
-        db.session.commit()
+        # Calculate costs
+        base_cost = Decimal(str(gpu.current_price)) * Decimal(str(duration_hours))
+        tax_rate = Decimal('0.08')  # 8% tax
+        platform_fee_rate = Decimal('0.05')  # 5% platform fee
+        
+        tax_amount = base_cost * tax_rate
+        platform_fee_amount = base_cost * platform_fee_rate
+        total_cost = float(base_cost + tax_amount + platform_fee_amount)
 
-        return jsonify(cluster.to_dict()), 200
+        # Check if user has sufficient balance
+        if user.balance < total_cost:
+            return jsonify({
+                "error": "Insufficient balance",
+                "required_amount": total_cost,
+                "current_balance": user.balance,
+                "cost_breakdown": {
+                    "base_cost": float(base_cost),
+                    "tax_rate": float(tax_rate),
+                    "tax_amount": float(tax_amount),
+                    "platform_fee_rate": float(platform_fee_rate),
+                    "platform_fee_amount": float(platform_fee_amount),
+                    "total_cost": total_cost
+                }
+            }), 400
+
+        # Start database transaction
+        try:
+            # First, create and flush the rental GPU to get its ID
+            rental_gpu = cluster.deploy_current_gpu(
+                ssh_keys=data.get("ssh_keys", []),
+                email_enabled=data.get("email_enabled", True),
+                duration_hours=duration_hours,
+            )
+            db.session.add(rental_gpu)
+            db.session.flush()  # This assigns the ID without committing
+
+            # Next, create and flush the transaction to get its ID
+            transaction = Transaction(
+                user_id=user.id,
+                amount=-total_cost,  # Negative amount for a debit
+                status="completed",
+                description=f"GPU Rental: {gpu_config.configuration.gpu_name} for {duration_hours} hours"
+            )
+            db.session.add(transaction)
+            db.session.flush()  # This assigns the ID without committing
+
+            # Now we can create the deployment cost with valid IDs
+            deployment_cost = DeploymentCost(
+                rental_gpu_id=rental_gpu.id,  # Now we have this ID
+                transaction_id=transaction.id,  # Now we have this ID
+                base_cost=float(base_cost),
+                tax_rate=float(tax_rate),
+                tax_amount=float(tax_amount),
+                platform_fee_rate=float(platform_fee_rate),
+                platform_fee_amount=float(platform_fee_amount),
+                total_cost=total_cost
+            )
+            db.session.add(deployment_cost)
+
+            # Update user's balance
+            user.balance -= total_cost
+            
+            # Now commit everything
+            db.session.commit()
+
+            return jsonify({
+                "cluster": cluster.to_dict(),
+                "cost_breakdown": deployment_cost.to_dict()
+            }), 200
+
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
