@@ -1,5 +1,5 @@
 from utils.database import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class User(db.Model):
@@ -10,7 +10,7 @@ class User(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     email_verified = db.Column(db.Boolean, default=False)
     disabled = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
     last_login = db.Column(db.DateTime)
     organization = db.Column(db.String(255))
     first_name = db.Column(db.String(255), nullable=False)
@@ -33,25 +33,25 @@ class User(db.Model):
     transactions = db.relationship("Transaction", backref="user", lazy=True)
 
     def __repr__(self):
-        return f"<User {self.email}>"
-
+        return f"<User {self.email}>"   
+    
     def to_dict(self):
         """Convert user object to dictionary"""
         return {
             "id": self.id,
             "firebase_uid": self.firebase_uid,
             "email": self.email,
-            "organization": self.organization,
+            "organization": self.organization if self.organization else None,
             "email_verified": self.email_verified,
             "disabled": self.disabled,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "last_login": self.last_login.isoformat() if self.last_login else None,
             "first_name": self.first_name,
             "last_name": self.last_name,
-            "experience_level": self.experience_level,
-            "referral_source": self.referral_source,
+            "experience_level": self.experience_level if self.experience_level else None,
+            "referral_source": self.referral_source if self.referral_source else None,
             "balance": self.balance,
-            "stripe_customer_id": self.stripe_customer_id,
+            "stripe_customer_id": self.stripe_customer_id if self.stripe_customer_id else None,
             "clusters": [cluster.to_dict() for cluster in self.clusters],
             "transactions": [transaction.to_dict() for transaction in self.transactions]
         }
@@ -67,3 +67,17 @@ class User(db.Model):
             "email_verified": firebase_user.get("email_verified", False),
             "disabled": firebase_user.get("disabled", False),
         }
+    
+    def __init__(self, **kwargs):
+        # Convert empty strings to None for optional fields
+        if 'organization' in kwargs and kwargs['organization'] == '':
+            kwargs['organization'] = None
+            
+        if 'stripe_customer_id' in kwargs and kwargs['stripe_customer_id'] == '':
+            kwargs['stripe_customer_id'] = None
+
+        if 'referral_source' in kwargs and kwargs['referral_source'] == '':
+            kwargs['referral_source'] = None
+            
+        # Critical line - call super class __init__ with modified kwargs
+        super(User, self).__init__(**kwargs)
