@@ -376,3 +376,61 @@ def get_gpu_price_points(gpu_id):
     except Exception as e:
         logger.error(f"Error in get_gpu_price_points: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
+
+
+@bp.route("/compare", methods=["GET"])
+def compare_gpus():
+    """Find similar GPUs for comparison"""
+    try:
+        logger.info("Starting compare_gpus request")
+        
+        # Get comparison parameters
+        min_memory = request.args.get("memory.min", type=float)
+        max_memory = request.args.get("memory.max", type=float)
+        max_price = request.args.get("price.max", type=float)
+        gpu_vendor = request.args.get("vendor")
+        current_gpu_id = request.args.get("current_gpu_id", type=int)
+
+        logger.info(
+            "Comparison parameters: %s",
+            {
+                "min_memory": min_memory,
+                "max_memory": max_memory,
+                "max_price": max_price,
+                "gpu_vendor": gpu_vendor,
+                "current_gpu_id": current_gpu_id,
+            },
+        )
+
+        # Start with base query
+        query = GPUListing.query.join(GPUConfiguration)
+
+        # Apply memory filter if specified
+        if min_memory is not None:
+            query = query.filter(GPUConfiguration.gpu_memory >= min_memory)
+        if max_memory is not None:
+            query = query.filter(GPUConfiguration.gpu_memory <= max_memory)
+
+        # Apply price filter if specified
+        if max_price is not None:
+            query = query.filter(GPUListing.current_price <= max_price)
+
+        # Apply vendor filter if specified
+        if gpu_vendor:
+            query = query.filter(GPUConfiguration.gpu_vendor == gpu_vendor)
+
+        # Exclude current GPU
+        if current_gpu_id:
+            query = query.filter(GPUListing.id != current_gpu_id)
+
+        # Get results and sort by price
+        gpus = query.order_by(GPUListing.current_price.asc()).limit(10).all()
+        
+        result = [gpu.to_dict() for gpu in gpus]
+        logger.info(f"Found {len(result)} similar GPUs")
+        
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Error in compare_gpus: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
