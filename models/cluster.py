@@ -1,7 +1,7 @@
 from utils.database import db
 from datetime import datetime
 from models.gpu_listing import GPUListing
-
+from models.user import User
 
 class Cluster(db.Model):
     __tablename__ = "clusters"
