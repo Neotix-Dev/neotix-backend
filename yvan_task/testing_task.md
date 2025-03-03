@@ -92,6 +92,70 @@ By the end of the week, you should have:
 - Document questions that the AI couldn't answer clearly
 - Focus on learning how to effectively communicate with the AI
 
+## Running Tests
+
+Before you start implementing new tests, you'll need to set up your testing environment:
+
+1. Install test dependencies:
+```bash
+pip install pytest pytest-cov
+```
+
+2. Create a test database:
+```bash
+createdb neotix_test
+```
+
+3. Set up test environment variables:
+```bash
+export DATABASE_URI=postgresql://postgres:postgres@localhost:5432/neotix_test
+```
+
+### Running Different Test Suites
+
+1. Run all tests:
+```bash
+pytest
+```
+
+2. Run tests with coverage report:
+```bash
+pytest --cov=./ --cov-report=term-missing
+```
+
+3. Run specific test files:
+```bash
+# Run utils tests
+pytest tests/utils/test_cache.py tests/utils/test_gpu_data_fetcher.py
+
+# Run route tests
+pytest tests/routes/
+
+# Run a specific test function
+pytest tests/utils/test_cache.py::test_cache_set
+```
+
+4. Run tests with detailed output:
+```bash
+pytest -v
+```
+
+5. Run tests and stop on first failure:
+```bash
+pytest -x
+```
+
+### Debugging Failed Tests
+
+If tests fail, you can:
+1. Use `-v` flag for verbose output
+2. Use `-s` flag to see print statements
+3. Use `pytest.set_trace()` in your test for debugging
+4. Check the test database state
+5. Review the test logs
+
+Remember: Always ensure your test database is clean before running tests. The test suite should handle this automatically, but if you encounter issues, you might need to reset the test database manually.
+
 ## CI/CD Implementation
 
 A critical part of this testing task is implementing a robust CI/CD pipeline. You will need to:
