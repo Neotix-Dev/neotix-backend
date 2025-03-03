@@ -1,6 +1,6 @@
 import sys
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import logging
 
@@ -28,7 +28,7 @@ def fetch_gpu_data():
     """
     Fetches GPU data from all providers using gpuhunt and updates the database
     """
-    current_time = datetime.utcnow()
+    current_time = datetime.now(timezone.utc)
     
     # Get all offers from all providers
     logger.info("Starting GPU data fetch from all providers...")
