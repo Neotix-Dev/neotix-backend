@@ -31,6 +31,7 @@ def db_fixture():
     mock_session.refresh = mock_refresh
     return mock_db
 
+@pytest.mark.unit_tests
 def test_user_creation(db_fixture):
     """Test creating a user with all required and optional fields"""
     mock_db = db_fixture
@@ -68,6 +69,7 @@ def test_user_creation(db_fixture):
     mock_db.session.add.assert_called_once_with(user)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 @pytest.mark.parametrize("db_fixture", ["db"], indirect=True)
 def test_default_values(db_fixture):
     """Test default values are correctly applied when saved"""
@@ -96,6 +98,7 @@ def test_default_values(db_fixture):
     assert user.stripe_customer_id is None
     assert user.last_login is None
 
+@pytest.mark.unit_tests
 def test_user_to_dict():
     """Test the to_dict method returns correct data"""
 
@@ -136,6 +139,7 @@ def test_user_to_dict():
     assert user_dict["clusters"] == []
     assert user_dict["transactions"] == []
 
+@pytest.mark.unit_tests
 @patch('models.user.db.session')
 def test_user_update(mock_session):
     """Test updating user attributes with mocked database"""
@@ -177,6 +181,7 @@ def test_user_update(mock_session):
     assert updated_user.first_name == "Updated"
     assert updated_user.last_name == "Name"
 
+@pytest.mark.unit_tests
 def test_user_relationships():
     """Test user relationships using mocks"""
     # Create user
@@ -204,6 +209,7 @@ def test_user_relationships():
     assert "clusters" in user_dict
     assert user_dict["clusters"][0]["name"] == "Test Cluster"
 
+@pytest.mark.unit_tests
 def test_from_firebase_user():
     """Test creating a user from Firebase user data"""
     firebase_user = {
@@ -223,6 +229,7 @@ def test_from_firebase_user():
     assert user_data["email_verified"] is True
     assert user_data["disabled"] is False
 
+@pytest.mark.unit_tests
 def test_from_firebase_user_partial_name():
     """Test creating a user with only first name"""
     firebase_user = {
@@ -241,6 +248,7 @@ def test_from_firebase_user_partial_name():
 import pytest
 from sqlalchemy.exc import IntegrityError
 
+@pytest.mark.unit_tests
 @patch('models.user.db.session')
 def test_missing_required_fields(mock_session):
     """Test behavior when required fields are missing"""
@@ -277,6 +285,7 @@ def test_missing_required_fields(mock_session):
         mock_session.add(user2)
         mock_session.commit()
 
+@pytest.mark.unit_tests
 @patch('models.user.db.session')
 def test_database_constraints(mock_session):
     """Test database constraints for required fields"""
@@ -305,6 +314,7 @@ def test_database_constraints(mock_session):
     mock_session.add.assert_called_once_with(user)
     mock_session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_user_repr():
     """Test the string representation of a User object"""
     # Create a user with known values
@@ -321,6 +331,7 @@ def test_user_repr():
     # Assert it matches the expected format
     assert user_repr == "<User repr@example.com>"
 
+@pytest.mark.unit_tests
 def test_balance_operations():
     """Test balance operations for user account"""
     # Create a user with initial balance
@@ -347,6 +358,7 @@ def test_balance_operations():
     # Test setting to zero
     user.balance = 0.0
 
+@pytest.mark.unit_tests
 @pytest.mark.parametrize("db_fixture", ["db"], indirect=True)
 def test_timestamps_with_fixtures(db_fixture):
     """Test creation and last_login timestamps using our db fixture"""
@@ -386,7 +398,8 @@ def test_timestamps_with_fixtures(db_fixture):
     
     # Verify created_at isn't changed during updates
     assert user.created_at == initial_timestamp
-    
+
+@pytest.mark.unit_tests    
 @patch('models.user.db.session')
 def test_user_disable_enable(mock_session):
     """Test disabling and enabling a user"""
@@ -415,6 +428,7 @@ def test_user_disable_enable(mock_session):
     mock_session.add.assert_called_once_with(user)
     mock_session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 @patch('models.user.db.session')
 def test_email_verification_status(mock_session):
     """Test changing email verification status"""
@@ -438,6 +452,7 @@ def test_email_verification_status(mock_session):
     mock_session.add.assert_called_once_with(user)
     mock_session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 @patch('models.user.db.session')
 def test_bulk_update(mock_session):
     """Test updating multiple user attributes at once"""
@@ -474,6 +489,7 @@ def test_bulk_update(mock_session):
     mock_session.add.assert_called_once_with(user)
     mock_session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 @patch('models.user.db.session')
 def test_user_delete(mock_session):
     """Test deleting a user"""
@@ -492,6 +508,7 @@ def test_user_delete(mock_session):
     mock_session.delete.assert_called_once_with(user)
     mock_session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 @patch('models.user.db.session')
 def test_user_email_uniqueness(mock_session):
     """Test handling of duplicate email addresses"""

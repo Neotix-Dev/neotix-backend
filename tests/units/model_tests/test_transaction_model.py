@@ -2,6 +2,7 @@ import pytest
 from datetime import datetime, timezone
 from models.transaction import Transaction
 
+@pytest.mark.unit_tests
 def test_transaction_creation(db_fixture):
     """Test creating a Transaction with all required and optional fields"""
     mock_db = db_fixture
@@ -31,6 +32,7 @@ def test_transaction_creation(db_fixture):
     mock_db.session.add.assert_called_once_with(transaction)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_transaction_with_defaults(db_fixture):
     """Test creating a Transaction with default values"""
     mock_db = db_fixture
@@ -59,6 +61,7 @@ def test_transaction_with_defaults(db_fixture):
     mock_db.session.add.assert_called_once_with(transaction)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_transaction_to_dict():
     """Test the to_dict method returns correct data for Transaction"""
     # Create a transaction with specific date
@@ -86,6 +89,7 @@ def test_transaction_to_dict():
     assert transaction_dict["created_at"] == created_at.isoformat()
     assert transaction_dict["description"] == "Payment for GPU rental"
 
+@pytest.mark.unit_tests
 def test_transaction_with_null_fields(db_fixture):
     """Test the to_dict method correctly handles null fields"""
     mock_db = db_fixture

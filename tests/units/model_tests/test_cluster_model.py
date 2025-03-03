@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime, timezone
 
+@pytest.mark.unit_tests
 def test_cluster_creation(db_fixture, isolated_models, test_user):
     """Test creating a cluster with all required and optional fields"""
     mock_db = db_fixture
@@ -27,6 +28,7 @@ def test_cluster_creation(db_fixture, isolated_models, test_user):
     mock_db.session.add.assert_called_once_with(cluster)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_cluster_to_dict(isolated_models, test_user):
     """Test the to_dict method returns correct data"""
     Cluster, _ = isolated_models
@@ -55,6 +57,7 @@ def test_cluster_to_dict(isolated_models, test_user):
     assert cluster_dict["updated_at"] == "2023-05-15T00:00:00+00:00"
     assert cluster_dict["rental_gpu"] is None
 
+@pytest.mark.unit_tests
 def test_cluster_with_rental_gpu(isolated_models, test_user):
     """Test cluster with related rental GPU"""
     Cluster, RentalGPU = isolated_models
@@ -83,6 +86,7 @@ def test_cluster_with_rental_gpu(isolated_models, test_user):
     assert cluster_dict["rental_gpu"]["name"] == "RTX 4090"
     assert cluster_dict["rental_gpu"]["hourly_cost"] == 2.5
 
+@pytest.mark.unit_tests
 def test_rental_gpu_creation(db_fixture, isolated_models):
     """Test creating a rental GPU with all required and optional fields"""
     mock_db = db_fixture
@@ -117,6 +121,7 @@ def test_rental_gpu_creation(db_fixture, isolated_models):
     mock_db.session.add.assert_called_once_with(rental_gpu)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_rental_gpu_to_dict(isolated_models):
     """Test the to_dict method returns correct data for RentalGPU"""
     _, RentalGPU = isolated_models

@@ -13,6 +13,7 @@ if project_root not in sys.path:
 # Import cache functions
 from utils.cache import memory_cache, invalidate_cache, _cache
 
+@pytest.mark.unit_tests
 @pytest.fixture(autouse=True)
 def clear_cache():
     """Clear the cache before and after each test"""
@@ -20,6 +21,7 @@ def clear_cache():
     yield
     invalidate_cache()
 
+@pytest.mark.unit_tests
 def test_cache_basic_functionality():
     """Test that the memory_cache decorator caches function results"""
     call_count = 0
@@ -42,6 +44,7 @@ def test_cache_basic_functionality():
     assert sample_function(3, 4) == 7
     assert call_count == 2
 
+@pytest.mark.unit_tests
 def test_cache_expiry():
     """Test that cached results expire after the specified time"""
     call_count = 0
@@ -67,6 +70,7 @@ def test_cache_expiry():
     assert timed_function() == "Result 2"
     assert call_count == 2
 
+@pytest.mark.unit_tests
 def test_cache_invalidation():
     """Test that invalidate_cache clears all cached results"""
     call_count = 0
@@ -91,6 +95,7 @@ def test_cache_invalidation():
     assert sample_function() == 2
     assert call_count == 2
 
+@pytest.mark.unit_tests
 def test_different_functions_cache_independently():
     """Test that different functions get cached independently"""
     count_a = 0
@@ -127,6 +132,7 @@ def test_different_functions_cache_independently():
     assert count_a == 2
     assert count_b == 2
 
+@pytest.mark.unit_tests
 def test_cache_with_different_argument_types():
     """Test cache behavior with various argument types"""
     call_count = 0
@@ -153,6 +159,7 @@ def test_cache_with_different_argument_types():
     assert complex_args(1, key="value") == 5  # Cached
     assert call_count == 5  # Still 5, no new calls
 
+@pytest.mark.unit_tests
 def test_nested_cached_functions():
     """Test behavior with nested cached functions"""
     outer_count = 0
@@ -189,6 +196,7 @@ def test_nested_cached_functions():
     assert outer_count == 2
     assert inner_count == 2
 
+@pytest.mark.unit_tests
 def test_cache_key_generation():
     """Test that cache keys are properly generated"""
     # We can examine the _cache dictionary directly

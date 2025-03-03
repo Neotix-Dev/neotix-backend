@@ -2,6 +2,7 @@ import pytest
 from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
+@pytest.mark.unit_tests
 def test_rented_gpu_creation(db_fixture, isolated_user_preference_models):
     """Test creating a RentedGPU with all required and optional fields"""
     mock_db = db_fixture
@@ -33,6 +34,7 @@ def test_rented_gpu_creation(db_fixture, isolated_user_preference_models):
     mock_db.session.add.assert_called_once_with(rented_gpu)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_rented_gpu_to_dict(isolated_user_preference_models):
     """Test the to_dict method returns correct data for RentedGPU"""
     TestRentedGPU, _, _, _ = isolated_user_preference_models
@@ -64,6 +66,7 @@ def test_rented_gpu_to_dict(isolated_user_preference_models):
     assert rented_gpu_dict["rentalStart"] == rental_start.isoformat()
     assert rented_gpu_dict["rentalEnd"] == rental_end.isoformat()
 
+@pytest.mark.unit_tests
 def test_price_alert_specific_gpu(db_fixture, isolated_user_preference_models):
     """Test creating a PriceAlert for a specific GPU"""
     mock_db = db_fixture
@@ -101,6 +104,7 @@ def test_price_alert_specific_gpu(db_fixture, isolated_user_preference_models):
     assert alert_dict["1"]["gpuType"] is None
     assert alert_dict["1"]["createdAt"] == created_at.isoformat()
 
+@pytest.mark.unit_tests
 def test_price_alert_gpu_type(db_fixture, isolated_user_preference_models):
     """Test creating a PriceAlert for a GPU type"""
     mock_db = db_fixture
@@ -139,6 +143,7 @@ def test_price_alert_gpu_type(db_fixture, isolated_user_preference_models):
     assert alert_dict["type_RTX 3090"]["gpuType"] == "RTX 3090"
     assert alert_dict["type_RTX 3090"]["createdAt"] == created_at.isoformat()
 
+@pytest.mark.unit_tests
 def test_selected_gpu_creation(db_fixture, isolated_user_preference_models):
     """Test creating a SelectedGPU"""
     mock_db = db_fixture
@@ -165,6 +170,7 @@ def test_selected_gpu_creation(db_fixture, isolated_user_preference_models):
     mock_db.session.add.assert_called_once_with(selected_gpu)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_selected_gpu_to_dict(isolated_user_preference_models):
     """Test the to_dict method returns correct data for SelectedGPU"""
     _, _, TestSelectedGPU, _ = isolated_user_preference_models
@@ -192,6 +198,7 @@ def test_selected_gpu_to_dict(isolated_user_preference_models):
     assert selected_gpu_dict["created_at"] == created_at.isoformat()
     assert selected_gpu_dict["gpu"] == {"id": 1, "name": "Test GPU"}
 
+@pytest.mark.unit_tests
 def test_favorite_gpu_creation(db_fixture, isolated_user_preference_models):
     """Test creating a FavoriteGPU"""
     mock_db = db_fixture
@@ -217,6 +224,7 @@ def test_favorite_gpu_creation(db_fixture, isolated_user_preference_models):
     mock_db.session.add.assert_called_once_with(favorite_gpu)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_favorite_gpu_to_dict(isolated_user_preference_models):
     """Test the to_dict method returns correct data for FavoriteGPU"""
     _, _, _, TestFavoriteGPU = isolated_user_preference_models
@@ -246,6 +254,7 @@ def test_favorite_gpu_to_dict(isolated_user_preference_models):
     assert favorite_gpu_dict["name"] == "Test GPU"
     assert favorite_gpu_dict["host_name"] == "Test Host"
 
+@pytest.mark.unit_tests
 def test_favorite_gpu_to_dict_no_gpu(isolated_user_preference_models):
     """Test the to_dict method when gpu relationship is not set"""
     _, _, _, TestFavoriteGPU = isolated_user_preference_models
