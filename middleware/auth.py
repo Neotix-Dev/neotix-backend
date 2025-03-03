@@ -36,10 +36,10 @@ def auth_required(pass_user=True):
                 
             except auth.ExpiredIdTokenError:
                 return jsonify({"error": "Token expired"}), 401
-            except auth.InvalidIdTokenError:
-                return jsonify({"error": "Invalid token"}), 401
             except auth.RevokedIdTokenError:
                 return jsonify({"error": "Token revoked"}), 401
+            except auth.InvalidIdTokenError:
+                return jsonify({"error": "Invalid token"}), 401
             except Exception as e:
                 print(f"Auth error: {str(e)}")
                 return jsonify({"error": "Authentication failed"}), 401
