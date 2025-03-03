@@ -1,11 +1,19 @@
+import sys
 import pytest
 from unittest.mock import patch, MagicMock
+from pathlib import Path
 from flask import Flask, jsonify, g
 from firebase_admin import auth
+
+# Add the project root to the Python path
+project_root = str(Path(__file__).parent.parent.parent.parent)
+if project_root not in sys.path:
+    sys.path.append(project_root)
 
 # Import the auth_required decorator
 from middleware.auth import auth_required
 from models.user import User
+
 
 @pytest.fixture
 def app():
@@ -23,6 +31,7 @@ def mock_user():
     mock.email = "test@example.com"
     return mock
 
+@pytest.mark.unit_tests
 def test_no_auth_header(app):
     """Test when no authorization header is provided"""
     with app.test_request_context():
@@ -38,6 +47,7 @@ def test_no_auth_header(app):
         assert status_code == 401
         assert "No authorization token provided" in response.get_json()["error"]
 
+@pytest.mark.unit_tests
 def test_invalid_token_format(app):
     """Test when token format is invalid"""
     with app.test_request_context(headers={"Authorization": "InvalidFormat"}):
@@ -50,6 +60,7 @@ def test_invalid_token_format(app):
         assert status_code == 401
         assert "Invalid token format" in response.get_json()["error"]
 
+@pytest.mark.unit_tests
 def test_valid_token_user_not_found(app):
     """Test when token is valid but user is not found in database"""
     with app.test_request_context(headers={"Authorization": "Bearer valid_token"}):
@@ -76,6 +87,7 @@ def test_valid_token_user_not_found(app):
                 assert status_code == 404
                 assert "User not found" in response.get_json()["error"]
 
+@pytest.mark.unit_tests
 def test_valid_token_with_user_pass_user_true(app, mock_user):
     """Test when token is valid and user is found, pass_user=True"""
     with app.test_request_context(headers={"Authorization": "Bearer valid_token"}):
@@ -105,6 +117,7 @@ def test_valid_token_with_user_pass_user_true(app, mock_user):
                 # Check that g.user_id was set
                 assert g.user_id == "test_uid"
 
+@pytest.mark.unit_tests
 def test_valid_token_with_user_pass_user_false(app, mock_user):
     """Test when token is valid and user is found, pass_user=False"""
     with app.test_request_context(headers={"Authorization": "Bearer valid_token"}):
@@ -133,6 +146,7 @@ def test_valid_token_with_user_pass_user_false(app, mock_user):
                 # Check that g.user_id was set
                 assert g.user_id == "test_uid"
 
+@pytest.mark.unit_tests
 def test_expired_token(app):
     """Test when token is expired"""
     with app.test_request_context(headers={"Authorization": "Bearer expired_token"}):
@@ -149,6 +163,7 @@ def test_expired_token(app):
             assert status_code == 401
             assert "Token expired" in response.get_json()["error"]
 
+@pytest.mark.unit_tests
 def test_invalid_token(app):
     """Test when token is invalid"""
     with app.test_request_context(headers={"Authorization": "Bearer invalid_token"}):
@@ -165,6 +180,7 @@ def test_invalid_token(app):
             assert status_code == 401
             assert "Invalid token" in response.get_json()["error"]
 
+@pytest.mark.unit_tests
 def test_revoked_token(app):
     """Test when token is revoked"""
     with app.test_request_context(headers={"Authorization": "Bearer revoked_token"}):
@@ -182,6 +198,7 @@ def test_revoked_token(app):
             # Match the actual response from your auth.py implementation
             assert response.get_json()["error"] == "Token revoked"
 
+@pytest.mark.unit_tests
 def test_other_exception(app):
     """Test when an unexpected exception occurs"""
     with app.test_request_context(headers={"Authorization": "Bearer token"}):
@@ -197,6 +214,7 @@ def test_other_exception(app):
             assert status_code == 401
             assert "Authentication failed" in response.get_json()["error"]
 
+@pytest.mark.unit_tests
 def test_decorator_without_parentheses(app, mock_user):
     """Test decorator when used as @auth_required"""
     with app.test_request_context(headers={"Authorization": "Bearer valid_token"}):
