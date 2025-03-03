@@ -14,6 +14,7 @@ if project_root not in sys.path:
 from utils.api_auth import generate_api_key, check_api_key, require_api_key, require_admin_key
 from models.api_key import APIKeyPermission, APIKey
 
+@pytest.mark.unit_tests
 class TestGenerateApiKey:
     """Tests for the API key generation function"""
     

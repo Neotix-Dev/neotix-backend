@@ -280,3 +280,9 @@ def mock_offer_factory(mock_gpu_vendor):
             self.spot = spot
             
     return MockOffer
+
+def pytest_configure(config):
+    """Register custom markers."""
+    config.addinivalue_line(
+        "markers", "unit_tests: mark tests as unit tests to run them separately"
+    )

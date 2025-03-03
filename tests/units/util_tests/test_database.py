@@ -11,6 +11,7 @@ if project_root not in sys.path:
 
 from utils.database import init_db
 
+@pytest.mark.unit_tests
 class TestDatabaseInitialization:
     """Test the init_db function"""
     

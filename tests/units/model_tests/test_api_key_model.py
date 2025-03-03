@@ -2,6 +2,7 @@ import pytest
 from datetime import datetime, timezone
 from models.api_key import APIKey, APIKeyPermission
 
+@pytest.mark.unit_tests
 def test_api_key_creation(db_fixture):
     """Test creating an APIKey with all required and optional fields"""
     mock_db = db_fixture
@@ -30,6 +31,7 @@ def test_api_key_creation(db_fixture):
     mock_db.session.add.assert_called_once_with(api_key)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_api_key_with_admin_permission(db_fixture):
     """Test creating an APIKey with admin permissions"""
     mock_db = db_fixture
@@ -55,6 +57,7 @@ def test_api_key_with_admin_permission(db_fixture):
     mock_db.session.add.assert_called_once_with(api_key)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_api_key_to_dict():
     """Test the to_dict method returns correct data for APIKey"""
     # Create an APIKey with custom dates
@@ -83,6 +86,7 @@ def test_api_key_to_dict():
     assert api_key_dict["last_used_at"] == last_used_at.isoformat()
     assert api_key_dict["is_active"] is True
 
+@pytest.mark.unit_tests
 def test_api_key_to_dict_with_null_last_used(db_fixture):
     """Test the to_dict method handles null last_used_at correctly"""
     mock_db = db_fixture

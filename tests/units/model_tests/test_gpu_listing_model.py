@@ -2,6 +2,7 @@ import pytest
 from datetime import datetime, timezone
 from models.gpu_listing import Host, GPUConfiguration, GPUListing, GPUPricePoint, GPUPriceHistory
 
+@pytest.mark.unit_tests
 def test_host_creation(db_fixture):
     """Test creating a Host with all required and optional fields"""
     mock_db = db_fixture
@@ -27,6 +28,7 @@ def test_host_creation(db_fixture):
     mock_db.session.add.assert_called_once_with(host)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_gpu_configuration_creation(db_fixture):
     """Test creating a GPUConfiguration with all required and optional fields"""
     mock_db = db_fixture
@@ -63,6 +65,7 @@ def test_gpu_configuration_creation(db_fixture):
     mock_db.session.add.assert_called_once_with(gpu_config)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_gpu_listing_creation(db_fixture):
     """Test creating a GPUListing with all required and optional fields"""
     mock_db = db_fixture
@@ -90,6 +93,7 @@ def test_gpu_listing_creation(db_fixture):
     mock_db.session.add.assert_called_once_with(gpu_listing)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_gpu_price_point_creation(db_fixture):
     """Test creating a GPUPricePoint with all required and optional fields"""
     mock_db = db_fixture
@@ -119,6 +123,7 @@ def test_gpu_price_point_creation(db_fixture):
     mock_db.session.add.assert_called_once_with(price_point)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_gpu_price_history_creation(db_fixture):
     """Test creating a GPUPriceHistory with all required and optional fields"""
     mock_db = db_fixture
@@ -148,6 +153,7 @@ def test_gpu_price_history_creation(db_fixture):
     mock_db.session.add.assert_called_once_with(price_history)
     mock_db.session.commit.assert_called_once()
 
+@pytest.mark.unit_tests
 def test_gpu_listing_to_dict(db_fixture):
     """Test the to_dict method returns correct data for GPUListing"""
     mock_db = db_fixture
