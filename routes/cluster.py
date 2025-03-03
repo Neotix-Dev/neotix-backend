@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, g
 from models.cluster import Cluster, RentalGPU
 from models.gpu_listing import GPUListing
 from utils.database import db
-from middleware.auth import require_auth
+from middleware.auth import auth_required
 from models.user import User
 from datetime import datetime, timedelta
 
@@ -10,7 +10,7 @@ bp = Blueprint("cluster", __name__, url_prefix="/api/clusters")
 
 
 @bp.route("/", methods=["GET"])
-@require_auth()
+@auth_required()
 def get_user_clusters():
     """Get all clusters for the current user"""
     try:
@@ -26,7 +26,7 @@ def get_user_clusters():
 
 
 @bp.route("/<int:cluster_id>", methods=["GET"])
-@require_auth()
+@auth_required()
 def get_cluster(cluster_id):
     """Get a cluster"""
     try:
@@ -44,7 +44,7 @@ def get_cluster(cluster_id):
 
 
 @bp.route("/", methods=["POST"])
-@require_auth()
+@auth_required()
 def create_cluster():
     """Create a new cluster"""
     try:
@@ -74,7 +74,7 @@ def create_cluster():
 
 
 @bp.route("/<int:cluster_id>", methods=["PUT"])
-@require_auth()
+@auth_required()
 def update_cluster(cluster_id):
     """Update a cluster"""
     try:
@@ -101,7 +101,7 @@ def update_cluster(cluster_id):
 
 
 @bp.route("/<int:cluster_id>", methods=["DELETE"])
-@require_auth()
+@auth_required()
 def delete_cluster(cluster_id):
     """Delete a cluster"""
     try:
@@ -123,7 +123,7 @@ def delete_cluster(cluster_id):
 
 
 @bp.route("/<int:cluster_id>/gpu", methods=["POST"])
-@require_auth()
+@auth_required()
 def add_gpu_to_cluster(cluster_id):
     """Add a GPU to a cluster as a rental GPU"""
     try:
@@ -172,7 +172,7 @@ def add_gpu_to_cluster(cluster_id):
 
 
 @bp.route("/<int:cluster_id>/gpu/access", methods=["POST"])
-@require_auth()
+@auth_required()
 def manage_gpu_access(cluster_id):
     """Grant or revoke access to a rental GPU for users"""
     try:
@@ -211,7 +211,7 @@ def manage_gpu_access(cluster_id):
 
 
 @bp.route("/<int:cluster_id>/gpu/ssh-keys", methods=["PUT"])
-@require_auth()
+@auth_required()
 def update_ssh_keys(cluster_id):
     """Update SSH keys for a rental GPU"""
     try:
