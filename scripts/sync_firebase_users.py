@@ -83,8 +83,11 @@ def sync_users():
             # Process each Firebase user
             for fb_user in firebase_users:
                 try:
-                    # Check if user exists in database
-                    db_user = User.query.filter_by(firebase_uid=fb_user.uid).first()
+                    # Check if user exists in database by firebase_uid or email
+                    db_user = User.query.filter(
+                        (User.firebase_uid == fb_user.uid) |
+                        (User.email == fb_user.email)
+                    ).first()
                     
                     if not db_user:
                         # Create new user

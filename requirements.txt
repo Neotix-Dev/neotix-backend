@@ -34,3 +34,6 @@ beautifulsoup4>=4.12.2
 
 # payments 
 stripe
+
+# AWS
+boto3>=1.34.0

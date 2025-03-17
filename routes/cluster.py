@@ -147,7 +147,7 @@ def add_gpu_to_cluster(cluster_id):
 @bp.route("/<int:cluster_id>/gpu/deploy", methods=["POST"])
 @require_auth()
 def deploy_cluster_gpu(cluster_id):
-    """Deploy the current GPU in a cluster, converting it to a rental"""
+    """Deploy a GPU to a cluster"""
     try:
         user = User.query.filter_by(firebase_uid=g.user_id).first()
         if not user:
@@ -160,6 +160,17 @@ def deploy_cluster_gpu(cluster_id):
         if cluster.user_id != user.id:
             return jsonify({"error": "Unauthorized"}), 403
 
+        # Check if there's already an active rental
+        active_rental = cluster.active_rental
+        if active_rental:
+            if not active_rental.ssh_keys:
+                # No instance was created, so we can safely delete this rental
+                db.session.delete(active_rental)
+                db.session.commit()
+            else:
+                return jsonify({"error": "Cluster already has an active GPU"}), 400
+
+        # Get GPU configuration from cluster
         gpu_config = cluster.current_gpu
         if not gpu_config:
             return jsonify({"error": "No GPU configured in cluster"}), 400
@@ -196,23 +207,35 @@ def deploy_cluster_gpu(cluster_id):
                 }
             }), 400
 
-        # Start database transaction
+        rental_gpu = None
         try:
             # First, create and flush the rental GPU to get its ID
             rental_gpu = cluster.deploy_current_gpu(
-                ssh_keys=data.get("ssh_keys", []),
+                ssh_keys=[],  # Empty list since we'll add SSH keys after instance creation
                 email_enabled=data.get("email_enabled", True),
                 duration_hours=duration_hours,
+                config=data.get("config", {})  # Store the full config
             )
             db.session.add(rental_gpu)
             db.session.flush()  # This assigns the ID without committing
 
-            # Next, create and flush the transaction to get its ID
+            # Deploy AWS instance and get instance details
+            try:
+                instance_details = rental_gpu.deploy_aws_instance()
+            except Exception as e:
+                # If instance creation fails, delete the rental
+                db.session.rollback()
+                if rental_gpu.id:
+                    db.session.delete(rental_gpu)
+                    db.session.commit()
+                raise e
+
+            # Create and flush the transaction to get its ID
             transaction = Transaction(
                 user_id=user.id,
                 amount=-total_cost,  # Negative amount for a debit
                 status="completed",
-                description=f"GPU Rental: {gpu_config.configuration.gpu_name} for {duration_hours} hours"
+                description=f"GPU Rental: {gpu.configuration.gpu_name} for {duration_hours} hours"
             )
             db.session.add(transaction)
             db.session.flush()  # This assigns the ID without committing
@@ -242,13 +265,19 @@ def deploy_cluster_gpu(cluster_id):
             }), 200
 
         except Exception as e:
+            # If anything fails, make sure to clean up the rental
             db.session.rollback()
+            if rental_gpu and rental_gpu.id:
+                try:
+                    db.session.delete(rental_gpu)
+                    db.session.commit()
+                except:
+                    pass  # Ignore cleanup errors
             raise e
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     except Exception as e:
-        db.session.rollback()
         print(f"Error in deploy_cluster_gpu: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
@@ -305,6 +334,42 @@ def get_cluster_history(cluster_id):
 
     except Exception as e:
         print(f"Error fetching cluster history: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@bp.route("/<int:cluster_id>/gpu/ssh-key", methods=["GET"])
+@require_auth()
+def get_cluster_gpu_ssh_key(cluster_id):
+    """Get SSH key for the cluster's GPU"""
+    try:
+        user = User.query.filter_by(firebase_uid=g.user_id).first()
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        cluster = Cluster.query.get(cluster_id)
+        if not cluster:
+            return jsonify({"error": "Cluster not found"}), 404
+
+        if cluster.user_id != user.id:
+            return jsonify({"error": "Unauthorized"}), 403
+
+        # Check if there's an active rental
+        active_rental = cluster.active_rental
+        if not active_rental:
+            return jsonify({"error": "No active GPU rental found"}), 400
+
+        # Get SSH key and connection details
+        try:
+            ssh_details = active_rental.get_ssh_key()
+            return jsonify({
+                "message": "Retrieved SSH key successfully",
+                **ssh_details
+            }), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    except Exception as e:
+        print(f"Error in get_cluster_gpu_ssh_key: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 

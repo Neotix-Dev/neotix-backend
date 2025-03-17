@@ -42,7 +42,7 @@ class Cluster(db.Model):
             )
         ).first()
 
-    def deploy_current_gpu(self, ssh_keys=None, email_enabled=True, duration_hours=24):
+    def deploy_current_gpu(self, ssh_keys=None, email_enabled=True, duration_hours=24, config=None):
         """Deploy the current GPU, converting it to a rental"""
 
         if not self.current_gpu:
@@ -53,22 +53,29 @@ class Cluster(db.Model):
 
         # Get current GPU configuration
         gpu = self.current_gpu
-        config = gpu.configuration if gpu else None
+        gpu_config = gpu.configuration if gpu else None
+
+        # Merge GPU config with user config
+        base_config = {
+            "gpu_name": gpu_config.gpu_name if gpu_config else None,
+            "gpu_vendor": gpu_config.gpu_vendor if gpu_config else None,
+            "gpu_memory": gpu_config.gpu_memory if gpu_config else None,
+            "gpu_count": gpu_config.gpu_count if gpu_config else None,
+            "cpu": gpu_config.cpu if gpu_config else None,
+            "memory": gpu_config.memory if gpu_config else None,
+            "disk_size": gpu_config.disk_size if gpu_config else None,
+        }
+
+        # Update with user config if provided
+        if config:
+            base_config.update(config)
 
         rental_gpu = RentalGPU(
             cluster_id=self.id,
             gpu_listing_id=self.current_gpu_id,
             user_id=self.user_id,
             price=gpu.current_price,
-            configuration={
-                "gpu_name": config.gpu_name if config else None,
-                "gpu_vendor": config.gpu_vendor if config else None,
-                "gpu_memory": config.gpu_memory if config else None,
-                "gpu_count": config.gpu_count if config else None,
-                "cpu": config.cpu if config else None,
-                "memory": config.memory if config else None,
-                "disk_size": config.disk_size if config else None,
-            },
+            configuration=base_config,
             ssh_keys=ssh_keys or [],
             email_enabled=email_enabled,
         )
