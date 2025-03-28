@@ -14,8 +14,8 @@ bp = Blueprint("clusters", __name__)
 
 
 @bp.route("/", methods=["GET"])
-@auth_required()
-def get_user_clusters():
+@require_auth()
+def get_clusters():
     """Get all clusters for the current user"""
     try:
         user = User.query.filter_by(firebase_uid=g.user_id).first()
@@ -24,19 +24,6 @@ def get_user_clusters():
 
         clusters = Cluster.query.filter_by(user_id=user.id).all()
         return jsonify([cluster.to_dict() for cluster in clusters]), 200
-    except Exception as e:
-        print(f"Error in get_user_clusters: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
-
-@bp.route("/<int:cluster_id>", methods=["GET"])
-@auth_required()
-def get_cluster(cluster_id):
-    """Get a cluster"""
-    try:
-        user = User.query.filter_by(firebase_uid=g.user_id).first()
-        if not user:
-            return jsonify({"error": "User not found. Please sync your account."}), 404
 
     except Exception as e:
         print(f"Error in get_clusters: {str(e)}")
