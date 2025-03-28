@@ -17,10 +17,10 @@ def load_json_data(file_path):
 
 def populate_db():
     app = create_app()
-    
+
     # Override the database URI for local population
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
-    
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI")
+
     with app.app_context():
         print("Starting database population...")
 

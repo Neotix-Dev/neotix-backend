@@ -17,8 +17,10 @@ class User(db.Model):
     last_name = db.Column(db.String(255), nullable=False)
     experience_level = db.Column(db.String(50), default="beginner")
     referral_source = db.Column(db.String(50), default="")
-    balance = db.Column(db.Float, default=0.0)  # User's balance in dollars
     stripe_customer_id = db.Column(db.String(255), unique=True)  # Stripe customer ID for saved payment methods
+
+    # Add balance field
+    balance = db.Column(db.Float, default=0.0)  # User's balance in dollars
 
     # Relationships with preference models
     # rented_gpus = db.relationship("RentedGPU", backref=db.backref("user", lazy=True))
@@ -26,11 +28,11 @@ class User(db.Model):
     # selected_gpus = db.relationship("SelectedGPU", backref=db.backref("user", lazy=True))
     # favorite_gpus = db.relationship("FavoriteGPU", backref=db.backref("user", lazy=True))
 
-    # Add clusters relationship
-    clusters = db.relationship("Cluster", backref="user", lazy=True)
-    
-    # Add transactions relationship
-    transactions = db.relationship("Transaction", backref="user", lazy=True)
+
+    # Define relationships using strings to avoid circular imports
+    clusters = db.relationship("Cluster", backref=db.backref("user", lazy=True))
+    transactions = db.relationship("Transaction", backref=db.backref("user", lazy=True))
+    rental_gpus = db.relationship("RentalGPU", back_populates="user", lazy=True)
 
     def __repr__(self):
         return f"<User {self.email}>"   

@@ -2,6 +2,9 @@ from utils.database import db
 from datetime import datetime
 from models.gpu_listing import GPUListing
 from models.user import User
+from models.rental_gpu import RentalGPU
+from datetime import timedelta
+
 
 class Cluster(db.Model):
     __tablename__ = "clusters"
@@ -14,13 +17,92 @@ class Cluster(db.Model):
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-
-    # One-to-one relationship with RentalGPU
-    rental_gpu = db.relationship(
-        "RentalGPU", backref=db.backref("cluster", uselist=False), uselist=False
+    current_gpu_id = db.Column(
+        db.Integer, db.ForeignKey("gpu_listings.id"), nullable=True
     )
 
+    # Relationship with current GPU
+    current_gpu = db.relationship("GPUListing", foreign_keys=[current_gpu_id])
+
+    # Relationship with RentalGPU - one cluster can have many rentals (history)
+    rental_history = db.relationship(
+        "RentalGPU",
+        back_populates="cluster",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+    )
+
+    @property
+    def active_rental(self):
+        """Get the currently active GPU rental for this cluster, if any"""
+        now = datetime.utcnow()
+        return self.rental_history.filter(
+            db.and_(
+                RentalGPU.status == "active",
+                db.or_(RentalGPU.end_time.is_(None), RentalGPU.end_time > now),
+            )
+        ).first()
+
+    def deploy_current_gpu(self, ssh_keys=None, email_enabled=True, duration_hours=24, config=None):
+        """Deploy the current GPU, converting it to a rental"""
+
+        if not self.current_gpu:
+            raise ValueError("No GPU assigned to deploy")
+
+        if self.active_rental:
+            raise ValueError("Cluster already has an active rental")
+
+        # Get current GPU configuration
+        gpu = self.current_gpu
+        gpu_config = gpu.configuration if gpu else None
+
+        # Merge GPU config with user config
+        base_config = {
+            "gpu_name": gpu_config.gpu_name if gpu_config else None,
+            "gpu_vendor": gpu_config.gpu_vendor if gpu_config else None,
+            "gpu_memory": gpu_config.gpu_memory if gpu_config else None,
+            "gpu_count": gpu_config.gpu_count if gpu_config else None,
+            "cpu": gpu_config.cpu if gpu_config else None,
+            "memory": gpu_config.memory if gpu_config else None,
+            "disk_size": gpu_config.disk_size if gpu_config else None,
+        }
+
+        # Update with user config if provided
+        if config:
+            base_config.update(config)
+
+        rental_gpu = RentalGPU(
+            cluster_id=self.id,
+            gpu_listing_id=self.current_gpu_id,
+            user_id=self.user_id,
+            price=gpu.current_price,
+            configuration=base_config,
+            ssh_keys=ssh_keys or [],
+            email_enabled=email_enabled,
+        )
+
+        rental_gpu.status = "active"
+        # Use UTC for both start and end time
+        now = datetime.utcnow()
+        rental_gpu.start_time = now.replace(tzinfo=None)  # Ensure no timezone info
+        rental_gpu.end_time = (now + timedelta(hours=duration_hours)).replace(
+            tzinfo=None
+        )  # Ensure no timezone info
+
+        # Clear the current GPU since it's now a rental
+        # self.current_gpu_id = None
+
+        return rental_gpu
+
     def to_dict(self):
+        """Convert cluster to dictionary representation"""
+        active_rental = self.active_rental
+        current_gpu = self.current_gpu.to_dict() if self.current_gpu else None
+        rental_history = [
+            rental.to_dict()
+            for rental in self.rental_history.order_by(RentalGPU.start_time.desc())
+        ]
+
         return {
             "id": self.id,
             "name": self.name,
@@ -28,59 +110,7 @@ class Cluster(db.Model):
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
             "user_id": self.user_id,
-            "rental_gpu": self.rental_gpu.to_dict() if self.rental_gpu else None,
+            "current_gpu": current_gpu,
+            "rental_gpu": active_rental.to_dict() if active_rental else None,
+            "rental_history": rental_history,
         }
-
-
-class RentalGPU(GPUListing):
-    """A GPU listing that can be rented with additional rental-specific attributes"""
-
-    __tablename__ = "rental_gpus"
-    
-    # Use the id from GPUListing as both primary and foreign key
-    id = db.Column(db.Integer, db.ForeignKey("gpu_listings.id"), primary_key=True)
-    cluster_id = db.Column(db.Integer, db.ForeignKey("clusters.id"), unique=True)
-    ssh_keys = db.Column(db.JSON, nullable=True)  # Store multiple SSH keys as JSON
-    email_enabled = db.Column(db.Boolean, default=True)
-    rented = db.Column(db.Boolean, default=False)
-    rental_start = db.Column(db.DateTime, nullable=True)
-    rental_end = db.Column(db.DateTime, nullable=True)
-
-    # Many-to-many relationship with users who have access
-    users_with_access = db.relationship(
-        "User",
-        secondary="rental_gpu_users",
-        primaryjoin="RentalGPU.id == rental_gpu_users.c.rental_gpu_id",
-        secondaryjoin="rental_gpu_users.c.user_id == User.id",
-        backref=db.backref("accessible_gpus", lazy="dynamic"),
-    )
-
-    __mapper_args__ = {
-        "polymorphic_identity": "rental_gpu",
-        "inherit_condition": (id == GPUListing.id)  # Explicitly define the inheritance condition
-    }
-
-    def to_dict(self):
-        base_dict = super().to_dict()
-        rental_dict = {
-            "ssh_keys": self.ssh_keys,
-            "email_enabled": self.email_enabled,
-            "rented": self.rented,
-            "rental_start": (
-                self.rental_start.isoformat() if self.rental_start else None
-            ),
-            "rental_end": self.rental_end.isoformat() if self.rental_end else None,
-            "users_with_access": [user.id for user in self.users_with_access],
-        }
-        return {**base_dict, **rental_dict}
-
-
-# Association table for RentalGPU and User many-to-many relationship
-rental_gpu_users = db.Table(
-    "rental_gpu_users",
-    db.Column(
-        "rental_gpu_id", db.Integer, db.ForeignKey("rental_gpus.id"), primary_key=True
-    ),
-    db.Column("user_id", db.Integer, db.ForeignKey("users.id"), primary_key=True),
-    db.Column("added_at", db.DateTime, default=datetime.utcnow),
-)

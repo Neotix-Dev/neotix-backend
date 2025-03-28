@@ -1,139 +1,161 @@
-import firebase_admin
-from firebase_admin import credentials, auth
-from datetime import datetime
 import sys
 import os
+from datetime import datetime
+import firebase_admin
+from firebase_admin import credentials, auth
+from dotenv import load_dotenv
+from flask import Flask
 
-# Add the parent directory to sys.path to import app-level modules
+# Add the parent directory to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app import create_app
-from models.user import User
 from utils.database import db
+from models.user import User
+from models.cluster import Cluster
+from models.rental_gpu import RentalGPU
+from models.transaction import Transaction
 
+# Load environment variables
+load_dotenv()
+
+# Initialize Flask app
+app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/neotix")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db.init_app(app)
 
 def initialize_firebase():
-    """Initialize Firebase Admin SDK if not already initialized."""
-    if not firebase_admin._apps:
-        cred = credentials.Certificate("firebaseKey.json")
-        firebase_admin.initialize_app(cred)
-
+    """Initialize Firebase Admin SDK"""
+    try:
+        # Check if already initialized
+        if not firebase_admin._apps:
+            cred_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "firebaseKey.json")
+            
+            if not os.path.exists(cred_path):
+                raise FileNotFoundError(f"Firebase credentials file not found at: {cred_path}")
+            
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred)
+            print("Firebase initialized successfully")
+        else:
+            print("Firebase already initialized")
+    except Exception as e:
+        print(f"Error initializing Firebase: {str(e)}")
+        sys.exit(1)
 
 def get_all_firebase_users():
     """Retrieve all users from Firebase."""
     users = []
-    page = None
+    page_token = None
     while True:
         try:
-            result = auth.list_users(page_token=page)
+            # Get next batch of users
+            result = auth.list_users(max_results=1000, page_token=page_token)
             users.extend(result.users)
-            if not result.page_token:
+            
+            # Get next page token
+            page_token = result.next_page_token
+            
+            # If no more pages, break
+            if not page_token:
                 break
-            page = result.page_token
         except Exception as e:
             print(f"Error fetching Firebase users: {e}")
             break
     return users
 
-
 def sync_users():
-    """Sync Firebase users with database users."""
-    print("Starting user sync...")
-
-    # Get all Firebase users
-    firebase_users = get_all_firebase_users()
-    firebase_uids = {user.uid for user in firebase_users}
-
-    # Get all database users
-    db_users = User.query.all()
-    db_uids = {user.firebase_uid for user in db_users}
-
-    # Track statistics
-    stats = {"created": 0, "updated": 0, "disabled": 0, "errors": 0}
-
-    # Process Firebase users
-    for firebase_user in firebase_users:
+    """Sync Firebase users with local database"""
+    with app.app_context():
         try:
-            db_user = User.query.filter_by(firebase_uid=firebase_user.uid).first()
-
-            if not db_user:
-                # Create new user
-                new_user = User(
-                    firebase_uid=firebase_user.uid,
-                    email=firebase_user.email or "",
-                    email_verified=firebase_user.email_verified,
-                    disabled=firebase_user.disabled,
-                    first_name=(
-                        firebase_user.display_name.split()[0]
-                        if firebase_user.display_name
-                        else ""
-                    ),
-                    last_name=(
-                        " ".join(firebase_user.display_name.split()[1:])
-                        if firebase_user.display_name
-                        and len(firebase_user.display_name.split()) > 1
-                        else ""
-                    ),
-                    created_at=datetime.utcfromtimestamp(
-                        firebase_user.user_metadata.creation_timestamp / 1000
-                    ),
-                    last_login=(
-                        datetime.utcfromtimestamp(
-                            firebase_user.user_metadata.last_sign_in_timestamp / 1000
+            print("Starting user synchronization...")
+            
+            # Initialize Firebase
+            initialize_firebase()
+            
+            # Get Firebase users
+            firebase_users = get_all_firebase_users()
+            print(f"Found {len(firebase_users)} users in Firebase")
+            
+            # Track sync statistics
+            stats = {"created": 0, "updated": 0, "errors": 0}
+            
+            # Process each Firebase user
+            for fb_user in firebase_users:
+                try:
+                    # Check if user exists in database by firebase_uid or email
+                    db_user = User.query.filter(
+                        (User.firebase_uid == fb_user.uid) |
+                        (User.email == fb_user.email)
+                    ).first()
+                    
+                    if not db_user:
+                        # Create new user
+                        names = (fb_user.display_name or "").split(" ", 1)
+                        first_name = names[0] if names else ""
+                        last_name = names[1] if len(names) > 1 else ""
+                        
+                        db_user = User(
+                            firebase_uid=fb_user.uid,
+                            email=fb_user.email or "",
+                            first_name=first_name,
+                            last_name=last_name,
+                            email_verified=fb_user.email_verified,
+                            disabled=fb_user.disabled,
+                            created_at=datetime.utcfromtimestamp(
+                                fb_user.user_metadata.creation_timestamp / 1000
+                            ),
+                            last_login=datetime.utcfromtimestamp(
+                                fb_user.user_metadata.last_sign_in_timestamp / 1000
+                            ) if fb_user.user_metadata.last_sign_in_timestamp else None,
+                            experience_level="beginner"  # Default value
                         )
-                        if firebase_user.user_metadata.last_sign_in_timestamp
-                        else None
-                    ),
-                )
-                db.session.add(new_user)
-                stats["created"] += 1
-                print(f"Created user: {firebase_user.email}")
-            else:
-                # Update existing user
-                db_user.email = firebase_user.email or db_user.email
-                db_user.email_verified = firebase_user.email_verified
-                db_user.disabled = firebase_user.disabled
-                if firebase_user.display_name:
-                    db_user.first_name = firebase_user.display_name.split()[0]
-                    db_user.last_name = (
-                        " ".join(firebase_user.display_name.split()[1:])
-                        if len(firebase_user.display_name.split()) > 1
-                        else ""
-                    )
-                if firebase_user.user_metadata.last_sign_in_timestamp:
-                    db_user.last_login = datetime.utcfromtimestamp(
-                        firebase_user.user_metadata.last_sign_in_timestamp / 1000
-                    )
-                stats["updated"] += 1
-                print(f"Updated user: {firebase_user.email}")
-
+                        db.session.add(db_user)
+                        stats["created"] += 1
+                        print(f"Created user: {fb_user.email}")
+                        
+                    else:
+                        # Update existing user
+                        names = (fb_user.display_name or "").split(" ", 1)
+                        if names:
+                            db_user.first_name = names[0]
+                            if len(names) > 1:
+                                db_user.last_name = names[1]
+                        
+                        db_user.email = fb_user.email or db_user.email
+                        db_user.email_verified = fb_user.email_verified
+                        db_user.disabled = fb_user.disabled
+                        
+                        if fb_user.user_metadata.last_sign_in_timestamp:
+                            db_user.last_login = datetime.utcfromtimestamp(
+                                fb_user.user_metadata.last_sign_in_timestamp / 1000
+                            )
+                        
+                        stats["updated"] += 1
+                        print(f"Updated user: {fb_user.email}")
+                    
+                except Exception as e:
+                    print(f"Error processing user {fb_user.email}: {str(e)}")
+                    stats["errors"] += 1
+                    continue
+            
+            try:
+                # Commit all changes
+                db.session.commit()
+                
+                print("\nSync completed!")
+                print(f"Created: {stats['created']}")
+                print(f"Updated: {stats['updated']}")
+                print(f"Errors: {stats['errors']}")
+            except Exception as e:
+                print(f"Error committing changes: {str(e)}")
+                db.session.rollback()
+                sys.exit(1)
+            
         except Exception as e:
-            print(f"Error processing user {firebase_user.uid}: {str(e)}")
-            stats["errors"] += 1
-            continue
-
-    # Disable users that exist in database but not in Firebase
-    for db_user in db_users:
-        if db_user.firebase_uid not in firebase_uids and not db_user.disabled:
-            db_user.disabled = True
-            stats["disabled"] += 1
-            print(f"Disabled user: {db_user.email}")
-
-    # Commit all changes
-    try:
-        db.session.commit()
-        print("\nSync completed successfully!")
-        print(f"Created: {stats['created']}")
-        print(f"Updated: {stats['updated']}")
-        print(f"Disabled: {stats['disabled']}")
-        print(f"Errors: {stats['errors']}")
-    except Exception as e:
-        print(f"Error committing changes to database: {str(e)}")
-        db.session.rollback()
-
+            print(f"Error during sync: {str(e)}")
+            db.session.rollback()
+            sys.exit(1)
 
 if __name__ == "__main__":
-    app = create_app()
-    with app.app_context():
-        initialize_firebase()
-        sync_users()
+    sync_users()
