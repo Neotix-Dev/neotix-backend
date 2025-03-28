@@ -9,7 +9,8 @@ from routes.cluster import bp as cluster_bp
 from routes.transactions import bp as transactions_bp
 from routes.analytics import bp as analytics_bp
 from models.user import User
-from models.cluster import Cluster, RentalGPU
+from models.cluster import Cluster
+from models.rental_gpu import RentalGPU
 from models.gpu_listing import GPUListing
 from models.transaction import Transaction
 from commands.fetch_gpu_data import fetch_gpu_data_command
@@ -88,12 +89,13 @@ def create_app(environ=None, start_response=None):
     except Exception as e:
         logger.warning(f"Could not verify instance path is writable: {e}")
 
-    # Configure SQLite database with absolute path
+    # Configure database
     app.config.from_object(Config)
+    # Override the database URI directly
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:postgres@localhost:5432/neotix"
 
     # Debug: Print configuration
     logger.info("Database URI: %s", app.config.get("SQLALCHEMY_DATABASE_URI"))
-    logger.info("Environment DATABASE_URI: %s", os.getenv("DATABASE_URI"))
 
     # Initialize database
     db.init_app(app)
