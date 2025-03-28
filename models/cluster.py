@@ -1,6 +1,7 @@
 from utils.database import db
 from datetime import datetime
 from models.gpu_listing import GPUListing
+from models.user import User
 from models.rental_gpu import RentalGPU
 from datetime import timedelta
 

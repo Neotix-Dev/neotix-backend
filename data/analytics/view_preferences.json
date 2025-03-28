@@ -1,198 +1,23 @@
 [
   {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742096224092,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-16T03:37:04.141767"
+    "sessionId": "bb38cc71-2d47-4270-8c30-40a1e7aaffd4",
+    "timestamp": 1738988918764,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-02-08T04:28:38.825762"
   },
   {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742104489635,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-16T05:54:49.658508"
+    "sessionId": "61200143-57b9-4128-90a2-526754bab094",
+    "timestamp": 1739492851865,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-02-14T00:27:31.894996"
   },
   {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742175098076,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T01:31:38.093209"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742175116195,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T01:31:56.217696"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742196171276,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T07:22:51.297223"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742237324855,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T18:48:44.912626"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742237324856,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T18:48:44.915144"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742238295662,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T19:04:55.689279"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742239671099,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T19:27:51.116742"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742239713686,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T19:28:33.701096"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742243164300,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T20:26:04.316636"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742244568301,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T20:49:28.313276"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742246076390,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T21:14:36.407274"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742246315622,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T21:18:35.636522"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742247466471,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T21:37:46.487065"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742248644185,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T21:57:24.942277"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742249441887,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T22:10:42.363690"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742249441888,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T22:10:42.940282"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742250271209,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T22:24:31.223939"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742250469062,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T22:27:49.073380"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742252343037,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T22:59:03.053459"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742252668575,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T23:04:28.586627"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742252764610,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T23:06:04.669680"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742252796017,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T23:06:36.032356"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742252828825,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T23:07:08.846024"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742252887609,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T23:08:07.628045"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742252905413,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T23:08:31.898410"
-  },
-  {
-    "sessionId": "789db8b8-252b-4061-b9a5-7f4c8a02219a",
-    "timestamp": 1742252905414,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-17T23:08:31.912720"
+    "sessionId": "61200143-57b9-4128-90a2-526754bab094",
+    "timestamp": 1739492851865,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-02-14T00:27:31.895865"
   }
 ]

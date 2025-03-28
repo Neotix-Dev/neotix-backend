@@ -2,7 +2,7 @@ from functools import wraps
 from flask import request, jsonify
 from models.api_key import APIKey, APIKeyPermission
 from utils.database import db
-from datetime import datetime
+from datetime import datetime, timezone
 import secrets
 import os
 from dotenv import load_dotenv
@@ -51,7 +51,7 @@ def check_api_key(required_permission=None):
                 }), 403
                 
             # Update last used timestamp
-            key_record.last_used_at = datetime.utcnow()
+            key_record.last_used_at = datetime.now(timezone.utc)
             db.session.commit()
             
             return f(*args, **kwargs)

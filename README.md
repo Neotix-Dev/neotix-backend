@@ -21,6 +21,7 @@ sudo pacman -S postgresql
 ```
 
 Note: These are for linux, if on mac, pacman will not work. You will have to use brew.
+Find out how to set up on Windows. 
 
 
 
@@ -29,7 +30,8 @@ Note: These are for linux, if on mac, pacman will not work. You will have to use
 DATABASE_URI=postgresql://postgres:postgres@localhost:5432/neotix
 ```
 5. Now run the script 'setup_postgres.py' in the scripts folder.
-   
+
+> Note: We have not yet tested this on a Windows machine. So, if you are on a Windows computer, read the file carefully then figure out how to create the database manually. 
 
 5. Initialize the database:
 ```bash
@@ -40,12 +42,17 @@ flask db upgrade
 ```bash
 flask run
 ```
+In parallel, run the command:
 
 7. Fetch GPU data:
 ```bash
 flask fetch-gpu-data
 ```
-
+If it does not work on the get go. Run,
+```bash
+git clone https://github.com/Neotix-Dev/gpuhunt.git
+``` 
+As the gpuhunt repo is not automatically downloaded. Re-run the command `flask fetch-gpu-data` again.
 ## API Documentation
 
 ### Authentication
