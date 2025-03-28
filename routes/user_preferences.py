@@ -3,7 +3,7 @@ from models.user_preferences import RentedGPU, PriceAlert, FavoriteGPU, Selected
 from models.gpu_listing import GPUListing
 from utils.database import db
 from datetime import datetime
-from middleware.auth import require_auth
+from middleware.auth import auth_required
 
 bp = Blueprint("preferences", __name__)
 

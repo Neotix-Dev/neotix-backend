@@ -1,5 +1,5 @@
-from utils.database import db
-from datetime import datetime
+from utils.database import db 
+from datetime import datetime, timezone
 import math
 
 
@@ -94,8 +94,8 @@ class GPUListing(db.Model):
     )
     current_price = db.Column(db.Float, nullable=False)
     price_change = db.Column(db.String(10), nullable=False, default="0%")
-    host_id = db.Column(db.Integer, db.ForeignKey("hosts.id"), nullable=False)
-    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    host_id = db.Column(db.Integer, db.ForeignKey('hosts.id'), nullable=False)
+    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
 
     # Relationships
     host = db.relationship("Host", backref="listings")
@@ -106,7 +106,7 @@ class GPUListing(db.Model):
         self.configuration_id = configuration_id
         self.current_price = current_price
         self.host_id = host_id
-        self.last_updated = datetime.utcnow()
+        self.last_updated = datetime.now(timezone.utc)
 
     @staticmethod
     def compute_gpu_score(gpu_name, gpu_vendor, gpu_memory, gpu_count):
@@ -225,7 +225,7 @@ class GPUPricePoint(db.Model):
     price = db.Column(db.Float, nullable=False)
     location = db.Column(db.String(255), nullable=False)
     spot = db.Column(db.Boolean, default=False)
-    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
 
     def to_dict(self):
         return {
@@ -248,7 +248,7 @@ class GPUPriceHistory(db.Model):
         db.Integer, db.ForeignKey("gpu_configurations.id"), nullable=False
     )
     price = db.Column(db.Float, nullable=False)
-    date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    date = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
     location = db.Column(db.String(255), nullable=False)
     spot = db.Column(db.Boolean, default=False)
 
