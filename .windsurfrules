@@ -1,0 +1,4 @@
+The environment is in ~/neotix-backend/.venv/ 
+Then, to run the app, it's simply python app.py 
+The routes are in routes/ 
+And we have tests in tests/, for each function you write, make sure you write tests for it

@@ -3,47 +3,50 @@ import os
 from pathlib import Path
 import pytest
 from unittest.mock import MagicMock, patch
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+import jwt
 
 # Add the project root to the Python path
 project_root = str(Path(__file__).parent.parent.parent)
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-@pytest.fixture
-def db_fixture():
-    """Mock database fixture for unit testing"""
-    mock_db = MagicMock()
-    mock_session = MagicMock()
-    mock_db.session = mock_session
+from app import create_app
+from models.user import User
 
-    # Configure mock session to behave like a real session
-    def mock_refresh(obj):
-        # Only set timestamps if they don't exist or are None
-        if not hasattr(obj, 'created_at') or obj.created_at is None:
-            obj.created_at = datetime.now(timezone.utc)
-        if not hasattr(obj, 'updated_at') or obj.updated_at is None:
-            obj.updated_at = datetime.now(timezone.utc)
-        if not hasattr(obj, 'last_used_at') or obj.last_used_at is None:
-            obj.last_used_at = datetime.now(timezone.utc)                
-        # Simulate defaults being applied on refresh
-        if hasattr(obj, 'email_verified') and obj.email_verified is None:
-            obj.email_verified = False
-        if hasattr(obj, 'disabled') and obj.disabled is None:
-            obj.disabled = False
-        if hasattr(obj, 'experience_level') and obj.experience_level is None:
-            obj.experience_level = "beginner"
-        if hasattr(obj, 'referral_source') and obj.referral_source == "":
-            obj.referral_source = None
-        if hasattr(obj, 'balance') and obj.balance is None:
-            obj.balance = 0.0
-        if hasattr(obj, 'status') and obj.status is None:
-            obj.status = "pending"
-        if hasattr(obj, 'is_active') and obj.is_active is None:
-            obj.is_active = True  # Fixed the typo here
-            
-    mock_session.refresh = mock_refresh
-    return mock_db
+# --- Flask Test Fixtures ---
+
+@pytest.fixture(scope='session')
+def app():
+    """Create and configure a new app instance for each test session."""
+    os.environ['FLASK_ENV'] = 'testing'
+    app = create_app()
+    app.config.update({
+        "TESTING": True,
+        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
+        "SECRET_KEY": "test-secret-key"
+    })
+    yield app
+
+@pytest.fixture()
+def client(app):
+    """A test client for the app."""
+    return app.test_client()
+
+@pytest.fixture
+def auth_headers(app, test_user):
+    """Create authorization headers with a dummy JWT token."""
+    user_id = test_user.id
+    secret_key = app.config["SECRET_KEY"]
+    
+    payload = {
+        'user_id': user_id,
+        'exp': datetime.now(timezone.utc) + timedelta(hours=1)
+    }
+    token = jwt.encode(payload, secret_key, algorithm="HS256")
+    return {"Authorization": f"Bearer {token}"}
+
+# --- Existing Mock Fixtures ---
 
 @pytest.fixture
 def test_user():
@@ -60,7 +63,6 @@ def mock_user_query():
     mock_filter_by = MagicMock()
     mock_first = MagicMock()
 
-    # Set up the chain of mock calls
     mock_filter_by.first = mock_first
     mock_query.filter_by = MagicMock(return_value=mock_filter_by)
 
@@ -69,14 +71,12 @@ def mock_user_query():
 @pytest.fixture
 def isolated_models():
     """Get models completely isolated from SQLAlchemy"""
-    # Create mocks for all dependencies
     mock_relationship = MagicMock()
     mock_user = MagicMock()
     mock_rental_gpu_users = MagicMock()
     mock_db = MagicMock()
     mock_gpu_listing = MagicMock()
 
-    # Apply patches - store them to undo later
     patches = [
         patch('models.cluster.GPUListing', mock_gpu_listing),
         patch('models.cluster.db', mock_db),
@@ -85,11 +85,9 @@ def isolated_models():
         patch('sqlalchemy.orm.relationship', mock_relationship)
     ]
 
-    # Start all patches
     for p in patches:
         p.start()
 
-    # Create a simplified Cluster class without SQLAlchemy
     class TestCluster:
         def __init__(self, name, user_id, description=None):
             self.id = None
@@ -120,7 +118,6 @@ def isolated_models():
             }
             return result
 
-    # Create a simplified RentalGPU class
     class TestRentalGPU:
         def __init__(self, name=None, hourly_cost=None, ssh_keys=None, email_enabled=None, rented=None, rental_start=None, rental_end=None):
             self.id = None
@@ -147,14 +144,12 @@ def isolated_models():
 
     yield TestCluster, TestRentalGPU
 
-    # Stop all patches after the test is done
     for p in patches:
         p.stop()
 
 @pytest.fixture
 def isolated_user_preference_models():
     """Get user preference models completely isolated from SQLAlchemy"""
-    # Create isolated test classes directly instead of patching modules
     class TestRentedGPU:
         def __init__(self, gpu_id, is_active=True, rental_start=None, rental_end=None):
             self.id = None
@@ -259,14 +254,11 @@ def mock_offer_factory(mock_gpu_vendor):
             self.provider = provider
             self.gpu_name = gpu_name
             
-            # Create a vendor object with .value attribute to mimic enum behavior
             if gpu_vendor is None:
                 self.gpu_vendor = None
             elif isinstance(gpu_vendor, mock_gpu_vendor):
-                # If already a mock vendor, use it directly
                 self.gpu_vendor = gpu_vendor
             else:
-                # Create new mock vendor
                 self.gpu_vendor = mock_gpu_vendor(gpu_vendor)
                 
             self.gpu_count = gpu_count

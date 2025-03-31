@@ -3,6 +3,7 @@ from flask_cors import CORS
 from utils.database import db, init_db
 from routes.user_preferences import bp as user_preferences_bp
 from routes.gpu_listings import bp as gpu_bp
+from routes.gpu_listings import gpu_listings_bp
 from routes.user import bp as user_bp
 from routes.api import bp as api_bp
 from routes.cluster import bp as cluster_bp
@@ -109,6 +110,7 @@ def create_app(environ=None, start_response=None):
     # Register blueprints
     app.register_blueprint(user_preferences_bp, url_prefix="/api/user-preferences")
     app.register_blueprint(gpu_bp, url_prefix="/api/gpu")
+    app.register_blueprint(gpu_listings_bp)
     app.register_blueprint(user_bp, url_prefix="/api/user")
     app.register_blueprint(api_bp, url_prefix="/api")
     

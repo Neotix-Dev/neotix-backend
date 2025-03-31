@@ -11,7 +11,9 @@ from models.gpu_listing import (
 from utils.database import db
 from datetime import datetime
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload # <--- Added import
 from utils.cache import memory_cache
+from utils.vector_db import get_gpu_listings_collection, get_embedding_model
 
 # Configure logging
 logging.basicConfig(
@@ -434,3 +436,126 @@ def compare_gpus():
     except Exception as e:
         logger.error(f"Error in compare_gpus: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
+
+
+gpu_listings_bp = Blueprint("gpu_listings", __name__, url_prefix="/gpu_listings")
+
+
+@gpu_listings_bp.route("/search", methods=["POST"])
+def search_gpus_semantic():
+    """Search for GPU listings using semantic vector search."""
+    data = request.get_json()
+    if not data or "query" not in data:
+        return jsonify({"error": "Missing 'query' in request body"}), 400
+
+    search_query = data["query"]
+    limit = data.get("limit", 10) # Default to 10 results
+
+    if not isinstance(search_query, str) or not search_query.strip():
+        return jsonify({"error": "'query' must be a non-empty string"}), 400
+    
+    if not isinstance(limit, int) or limit <= 0:
+         return jsonify({"error": "'limit' must be a positive integer"}), 400
+
+    try:
+        logger.info(f"Received vector search request for query: '{search_query}', limit: {limit}")
+        collection = get_gpu_listings_collection()
+        embedding_model = get_embedding_model()
+
+        logger.info(f"Generating embedding for query: '{search_query}'")
+        query_embedding = embedding_model.encode(search_query, convert_to_numpy=True).tolist()
+
+        logger.info(f"Querying ChromaDB collection '{collection.name}'...")
+        results = collection.query(
+            query_embeddings=[query_embedding],
+            n_results=limit,
+            include=["metadatas", "distances"] # Include metadata and distances
+        )
+        logger.info(f"ChromaDB query returned {len(results['ids'][0])} results.")
+
+        if not results or not results["ids"] or not results["ids"][0]:
+            return jsonify({"message": "No matching GPU listings found."}), 404
+
+        # Extract postgres IDs from metadata and distances
+        postgres_ids = []
+        result_metadata_map = {}
+        distances_map = {}
+        for i, chroma_id in enumerate(results["ids"][0]):
+            metadata = results["metadatas"][0][i]
+            distance = results["distances"][0][i]
+            if "postgres_id" in metadata:
+                pg_id = metadata["postgres_id"]
+                postgres_ids.append(pg_id)
+                result_metadata_map[pg_id] = metadata
+                distances_map[pg_id] = distance
+            else:
+                 logger.warning(f"ChromaDB result with ID {chroma_id} missing 'postgres_id' in metadata. Skipping.")
+
+        if not postgres_ids:
+             return jsonify({"message": "No listings with valid IDs found after search."}), 404
+
+        # Fetch full listing details from PostgreSQL based on the IDs found
+        logger.info(f"Fetching details for {len(postgres_ids)} listings from PostgreSQL.")
+        try:
+            # Query GPUListings and explicitly join with GPUConfig
+            # Select both models to get config details without relying on a relationship attribute
+            results = db.session.query(
+                GPUListing,
+                GPUConfiguration
+            ).join(
+                GPUConfiguration, GPUListing.configuration_id == GPUConfiguration.id
+            ).options(
+                # Keep eager loading the host relationship
+                joinedload(GPUListing.host) 
+            ).filter(
+                GPUListing.id.in_(postgres_ids)
+            ).all()
+
+            # Results are now [(listing1, config1), (listing2, config2), ...]
+            # Manually construct the response data, preserving the order from ChromaDB
+            listings_data = []
+            listing_map = {listing.id: listing for listing, config in results}
+            config_map = {listing.id: config for listing, config in results}
+            host_map = {listing.id: listing.host for listing, config in results} # Pre-fetch hosts
+
+            for postgres_id in postgres_ids:
+                if postgres_id in listing_map:
+                    listing = listing_map[postgres_id]
+                    config = config_map[postgres_id]
+                    host = host_map[postgres_id]
+                    
+                    # Construct dictionary similar to to_dict but using joined data
+                    listings_data.append({
+                        "id": listing.id,
+                        "instance_name": listing.instance_name,
+                        "gpu_name": config.gpu_name,
+                        "gpu_vendor": config.gpu_vendor,
+                        "gpu_count": config.gpu_count,
+                        "gpu_memory": config.gpu_memory,
+                        "current_price": listing.current_price,
+                        "gpu_score": config.gpu_score,
+                        "price_change": listing.price_change,
+                        "cpu": config.cpu,
+                        "memory": config.memory,
+                        "provider": host.name if host else None,
+                        "last_updated": listing.last_updated.isoformat() if listing.last_updated else None,
+                        "host_id": listing.host_id,
+                        "search_distance": distances_map.get(postgres_id) # Add the search distance
+                    })
+            
+            if not listings_data:
+                 return jsonify({"message": "No matching GPU listings found after filtering"}), 404
+                 
+            logger.info(f"Returning {len(listings_data)} search results.")
+            return jsonify(listings_data)
+
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error during vector search: {e}", exc_info=True)
+            # Check if it's a ChromaDB specific error maybe?
+            return jsonify({"error": "An unexpected error occurred during search"}), 500
+
+    except Exception as e:
+        logger.error(f"Error during vector search: {e}", exc_info=True)
+        # Check if it's a ChromaDB specific error maybe?
+        return jsonify({"error": "An unexpected error occurred during search"}), 500
