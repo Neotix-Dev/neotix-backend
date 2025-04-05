@@ -178,3 +178,9 @@ All endpoints return JSON with standard structure:
 - 404: Not Found
 - 500: Server Error
 # Test change
+
+## Test PR Summary
+This is a test change to verify our GitHub Actions PR summary workflow. This change:
+1. Tests the automatic PR summarization
+2. Verifies the OpenAI integration
+3. Ensures the workflow is properly configured

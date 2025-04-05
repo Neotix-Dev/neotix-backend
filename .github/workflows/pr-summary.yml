@@ -1,0 +1,81 @@
+name: PR Summary Generator
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Dependencies
+        run: npm install @octokit/rest openai
+
+      - name: Generate PR Summary
+        uses: actions/github-script@v6
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          script: |
+            const { OpenAI } = require('openai');
+
+            const openai = new OpenAI({
+              apiKey: process.env.OPENAI_API_KEY
+            });
+
+            // Get PR details
+            const prNumber = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Get PR diff
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner,
+              repo,
+              pull_number: prNumber
+            });
+
+            // Prepare diff content
+            const diffContent = files.map(file => 
+              `File: ${file.filename}\nChanges: ${file.additions} additions, ${file.deletions} deletions\nStatus: ${file.status}\n`
+            ).join('\n');
+
+            // Generate summary using OpenAI
+            const completion = await openai.chat.completions.create({
+              model: "gpt-3.5-turbo",
+              messages: [
+                {
+                  role: "system",
+                  content: "You are a helpful code reviewer. Provide a concise summary of the changes in this PR."
+                },
+                {
+                  role: "user",
+                  content: `Please summarize these changes:\n${diffContent}`
+                }
+              ],
+              max_tokens: 500
+            });
+
+            const summary = completion.choices[0].message.content;
+
+            // Post summary as PR comment
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: prNumber,
+              body: `## 🤖 PR Summary\n\n${summary}\n\n---\n*This summary was automatically generated using OpenAI GPT-3.5*`
+            });
