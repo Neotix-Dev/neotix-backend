@@ -57,11 +57,11 @@ def sync_user():
 
 @bp.route("/profile", methods=["GET"])
 @auth_required
-def get_profile():
+def get_profile(current_user):
     """Get user profile"""
     try:
-        # User is available in g.current_user (set by auth_required)
-        return jsonify(g.current_user.to_dict()), 200
+        # User is passed as current_user parameter
+        return jsonify(current_user.to_dict()), 200
     except Exception as e:
         print(f"Error in get_profile: {str(e)}")
         traceback.print_exc()  # More detailed error logging

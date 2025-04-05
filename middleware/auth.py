@@ -26,8 +26,9 @@ def auth_required(pass_user=True):
                 if not user:
                     return jsonify({"error": "User not found"}), 404
 
-                # Always set g.user_id
+                # Set both g.user_id and g.current_user
                 g.user_id = decoded_token["uid"]
+                g.current_user = user
                 
                 # Only pass current_user if requested
                 if pass_user:

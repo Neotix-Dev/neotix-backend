@@ -1,44 +1,58 @@
 [
   {
-    "sessionId": "ba26e3f7-4bfb-4c05-af2c-391e3d9cafd6",
-    "timestamp": 1743168209961,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-28T13:23:30.104861"
+    "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
+    "timestamp": 1743861770841,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-05T14:02:50.851814"
   },
   {
-    "sessionId": "ba26e3f7-4bfb-4c05-af2c-391e3d9cafd6",
-    "timestamp": 1743168218893,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-28T13:23:38.904052"
+    "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
+    "timestamp": 1743863448635,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-05T14:30:48.647232"
   },
   {
-    "sessionId": "ba26e3f7-4bfb-4c05-af2c-391e3d9cafd6",
-    "timestamp": 1743168229601,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-28T13:23:49.613341"
+    "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
+    "timestamp": 1743864009469,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-05T14:40:09.478622"
   },
   {
-    "sessionId": "ba26e3f7-4bfb-4c05-af2c-391e3d9cafd6",
-    "timestamp": 1743168229601,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-28T13:23:49.613957"
+    "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
+    "timestamp": 1743864318801,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-05T14:45:18.808803"
   },
   {
-    "sessionId": "ba26e3f7-4bfb-4c05-af2c-391e3d9cafd6",
-    "timestamp": 1743168397866,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-28T13:26:37.880677"
+    "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
+    "timestamp": 1743865551140,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-05T15:05:51.199150"
   },
   {
-    "sessionId": "ba26e3f7-4bfb-4c05-af2c-391e3d9cafd6",
-    "timestamp": 1743168397867,
-    "viewType": "grid",
-    "initialView": "grid",
-    "recorded_at": "2025-03-28T13:26:37.881655"
+    "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
+    "timestamp": 1743865776549,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-05T15:09:36.574520"
+  },
+  {
+    "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
+    "timestamp": 1743865843267,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-05T15:10:43.282975"
+  },
+  {
+    "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
+    "timestamp": 1743866690885,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-05T15:24:50.904609"
   }
 ]
