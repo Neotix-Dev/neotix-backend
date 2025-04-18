@@ -180,10 +180,13 @@ def deploy_cluster_gpu(cluster_id):
             return jsonify({"error": "GPU not found"}), 404
 
         data = request.get_json() or {}
-        duration_hours = data.get("duration_hours", 24)
-
-        # Calculate costs
-        base_cost = Decimal(str(gpu.current_price)) * Decimal(str(duration_hours))
+        # Using hourly rate for on-demand deployments
+        hourly_rate = Decimal(str(gpu.current_price))
+        
+        # Initial deposit is for one hour
+        initial_hours = 1
+        base_cost = hourly_rate * Decimal(str(initial_hours))
+        
         tax_rate = Decimal('0.08')  # 8% tax
         platform_fee_rate = Decimal('0.05')  # 5% platform fee
         
@@ -213,7 +216,6 @@ def deploy_cluster_gpu(cluster_id):
             rental_gpu = cluster.deploy_current_gpu(
                 ssh_keys=[],  # Empty list since we'll add SSH keys after instance creation
                 email_enabled=data.get("email_enabled", True),
-                duration_hours=duration_hours,
                 config=data.get("config", {})  # Store the full config
             )
             db.session.add(rental_gpu)
@@ -235,7 +237,7 @@ def deploy_cluster_gpu(cluster_id):
                 user_id=user.id,
                 amount=-total_cost,  # Negative amount for a debit
                 status="completed",
-                description=f"GPU Rental: {gpu.configuration.gpu_name} for {duration_hours} hours"
+                description=f"GPU Rental Initial Deposit: {gpu.configuration.gpu_name} - On-demand usage"
             )
             db.session.add(transaction)
             db.session.flush()  # This assigns the ID without committing
@@ -285,7 +287,15 @@ def deploy_cluster_gpu(cluster_id):
 @bp.route("/<int:cluster_id>/gpu", methods=["DELETE"])
 @require_auth()
 def remove_gpu_from_cluster(cluster_id):
-    """Remove the GPU from a cluster"""
+    """Remove the GPU from a cluster (redirects to terminate_cluster_gpu)"""
+    # For consistency, we now use the terminate_cluster_gpu endpoint for all rental terminations
+    return terminate_cluster_gpu(cluster_id)
+
+
+@bp.route("/<int:cluster_id>/gpu/terminate", methods=["POST"])
+@require_auth()
+def terminate_cluster_gpu(cluster_id):
+    """Terminate an on-demand GPU deployment and calculate final charges"""
     try:
         user = User.query.filter_by(firebase_uid=g.user_id).first()
         if not user:
@@ -298,19 +308,104 @@ def remove_gpu_from_cluster(cluster_id):
         if cluster.user_id != user.id:
             return jsonify({"error": "Unauthorized"}), 403
 
+        # Get the active rental
         active_rental = cluster.active_rental
         if not active_rental:
             return jsonify({"error": "No active GPU rental found"}), 404
-
+        
+        # All deployments are now on-demand (no fixed duration)
+        
+        # Calculate the hours used and final charges
+        now = datetime.utcnow()
+        start_time = active_rental.start_time
+        
+        # Calculate the duration in hours (rounded up to the nearest hour)
+        duration = now - start_time
+        hours_used = max(1, (duration.total_seconds() + 3599) // 3600)  # Round up to nearest hour
+        
+        # Get the GPU to calculate costs
+        gpu = active_rental.gpu_listing
+        if not gpu:
+            return jsonify({"error": "GPU listing not found"}), 404
+            
+        # Calculate final costs
+        hourly_rate = Decimal(str(gpu.current_price))
+        base_cost = hourly_rate * Decimal(str(hours_used))
+        tax_rate = Decimal('0.08')  # 8% tax
+        platform_fee_rate = Decimal('0.05')  # 5% platform fee
+        
+        tax_amount = base_cost * tax_rate
+        platform_fee_amount = base_cost * platform_fee_rate
+        total_cost = float(base_cost + tax_amount + platform_fee_amount)
+        
+        # Retrieve the initial deposit transaction
+        # Find the DeploymentCost record for this rental
+        deployment_cost = DeploymentCost.query.filter_by(rental_gpu_id=active_rental.id).first()
+        if not deployment_cost:
+            return jsonify({"error": "Deployment cost record not found"}), 404
+            
+        # Get the initial transaction amount
+        initial_transaction = Transaction.query.get(deployment_cost.transaction_id)
+        if not initial_transaction:
+            return jsonify({"error": "Initial transaction record not found"}), 404
+            
+        initial_amount = abs(initial_transaction.amount)  # Convert to positive amount
+        
+        # Calculate the remaining amount to charge
+        remaining_amount = total_cost - initial_amount
+        
+        if remaining_amount > 0:
+            # Create a transaction for the remaining amount
+            transaction = Transaction(
+                user_id=user.id,
+                amount=-remaining_amount,  # Negative amount for a debit
+                status="completed",
+                description=f"GPU Rental Final Charge: {gpu.configuration.gpu_name} - {hours_used} hours used"
+            )
+            db.session.add(transaction)
+            db.session.flush()  # This assigns the ID without committing
+            
+            # Update the user's balance
+            user.balance -= remaining_amount
+            
+            # Update the deployment cost record with the final values
+            deployment_cost.base_cost = float(base_cost)
+            deployment_cost.tax_amount = float(tax_amount)
+            deployment_cost.platform_fee_amount = float(platform_fee_amount)
+            deployment_cost.total_cost = total_cost
+        
+        # Terminate the AWS instance if it exists
+        if active_rental.instance_id or (active_rental.ssh_keys and active_rental.ssh_keys[0].get('instance_id')):
+            try:
+                active_rental.terminate_aws_instance()
+            except Exception as e:
+                print(f"Error terminating AWS instance: {str(e)}")
+                # Continue even if instance termination fails
+        
+        # Mark the rental as completed
         active_rental.status = "completed"
-        active_rental.end_time = datetime.utcnow()
+        active_rental.end_time = now
         db.session.commit()
-
-        return jsonify(cluster.to_dict()), 200
-
+        
+        return jsonify({
+            "message": "GPU deployment terminated successfully",
+            "cluster": cluster.to_dict(),
+            "usage": {
+                "hours_used": int(hours_used),
+                "start_time": start_time.isoformat(),
+                "end_time": now.isoformat(),
+                "total_cost": total_cost,
+                "initial_charge": initial_amount,
+                "final_charge": max(0, remaining_amount)
+            }
+        }), 200
+            
+    except ValueError as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
         db.session.rollback()
-        print(f"Error in remove_gpu_from_cluster: {str(e)}")
+        print(f"Error in terminate_cluster_gpu: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 

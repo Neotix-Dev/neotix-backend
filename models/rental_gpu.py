@@ -124,11 +124,9 @@ class RentalGPU(db.Model):
     @property
     def is_active(self):
         """Check if this rental is currently active"""
-        return (
-            self.status == "active"
-            and self.start_time is not None
-            and (self.end_time is None or self.end_time > datetime.utcnow())
-        )
+        # For on-demand rentals, end_time is always None until terminated
+        # A rental is active if status is 'active' and it has a start time
+        return self.status == "active" and self.start_time is not None
 
     def deploy_aws_instance(self):
         """Deploy an AWS instance during cluster deployment."""
