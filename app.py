@@ -10,6 +10,7 @@ from routes.transactions import bp as transactions_bp
 from routes.analytics import bp as analytics_bp
 from routes.clusters_status import bp as clusters_status_bp
 from routes.financial_dashboard import bp as financial_dashboard_bp
+from routes.recommendations import bp as recommendations_bp
 from models.user import User
 from models.cluster import Cluster
 from models.rental_gpu import RentalGPU
@@ -119,6 +120,7 @@ def create_app(environ=None, start_response=None):
     app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
     app.register_blueprint(clusters_status_bp, url_prefix="/api/clusters-status")
     app.register_blueprint(financial_dashboard_bp, url_prefix="/api/finance")
+    app.register_blueprint(recommendations_bp, url_prefix="/api/recommendations")
 
     # Register CLI commands
     app.cli.add_command(fetch_gpu_data_command)
