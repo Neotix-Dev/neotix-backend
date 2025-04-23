@@ -138,6 +138,15 @@ def create_app(environ=None, start_response=None):
     @app.errorhandler(500)
     def internal_error(error):
         return jsonify({"error": "Internal server error"}), 500
+    
+    # Add health endpoint for monitoring
+    @app.route('/api/health', methods=['GET'])
+    def health_check():
+        return jsonify({
+            "status": "healthy",
+            "service": "neotix-backend",
+            "version": "1.0.0"
+        }), 200
 
     if environ is not None and start_response is not None:
         return app.wsgi_app(environ, start_response)

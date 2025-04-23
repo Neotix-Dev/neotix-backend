@@ -54,5 +54,33 @@
     "viewType": "table",
     "initialView": "table",
     "recorded_at": "2025-04-05T15:24:50.904609"
+  },
+  {
+    "sessionId": "b975a8b0-0558-48a4-bc06-ed423e5256db",
+    "timestamp": 1745263949051,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-21T19:32:29.069391"
+  },
+  {
+    "sessionId": "b975a8b0-0558-48a4-bc06-ed423e5256db",
+    "timestamp": 1745263949053,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-21T19:32:29.070219"
+  },
+  {
+    "sessionId": "ba26e3f7-4bfb-4c05-af2c-391e3d9cafd6",
+    "timestamp": 1745263987997,
+    "viewType": "grid",
+    "initialView": "grid",
+    "recorded_at": "2025-04-21T19:33:08.049055"
+  },
+  {
+    "sessionId": "ba26e3f7-4bfb-4c05-af2c-391e3d9cafd6",
+    "timestamp": 1745263987998,
+    "viewType": "grid",
+    "initialView": "grid",
+    "recorded_at": "2025-04-21T19:33:08.073276"
   }
 ]

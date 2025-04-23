@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # Main Neotix Backend
+  neotix-api:
+    image: neotix/main-api:latest
+    ports:
+      - "5000:5000"
+    networks:
+      - neotix-network
+    environment:
+      - DATABASE_URI=postgresql://postgres:postgres@db:5432/neotix
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+    volumes:
+      - ./firebaseKey.json:/app/firebaseKey.json
+    depends_on:
+      - db
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # GCP Deployment Handler
+  gcp-deployment-api:
+    image: neotix/gcp-deployment-api:latest
+    ports:
+      - "5001:5001"
+    networks:
+      - neotix-network
+    environment:
+      - DATABASE_URI=postgresql://postgres:postgres@db:5432/gcp_deployment
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - JWT_SECRET_KEY=b_NhAhlPX0AUz-YBHG29o37y-GdSbCwzJb8t5nmGNNc
+      - NEOTIX_API_BASE_URL=http://neotix-api:5000
+    depends_on:
+      - db
+      - neotix-api
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_MULTIPLE_DATABASES=neotix,gcp_deployment
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-multiple-postgres-databases.sh:/docker-entrypoint-initdb.d/init-multiple-postgres-databases.sh
+    networks:
+      - neotix-network
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+networks:
+  neotix-network:
+    driver: overlay
+    attachable: true
+
+volumes:
+  postgres-data:
