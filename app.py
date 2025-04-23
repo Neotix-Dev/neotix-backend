@@ -21,6 +21,7 @@ from config import Config
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 import logging
+from prometheus_flask_exporter import PrometheusMetrics
 
 # Configure logging
 logging.basicConfig(
@@ -142,11 +143,17 @@ def create_app(environ=None, start_response=None):
     # Add health endpoint for monitoring
     @app.route('/api/health', methods=['GET'])
     def health_check():
+        # Check if this is a canary instance
+        is_canary = os.environ.get('CANARY', 'false').lower() == 'true'
         return jsonify({
             "status": "healthy",
             "service": "neotix-backend",
-            "version": "1.0.0"
+            "version": "1.0.0",
+            "canary": is_canary
         }), 200
+
+    metrics = PrometheusMetrics(app)
+    metrics.info('app_info', 'Application info', version='1.0.0')
 
     if environ is not None and start_response is not None:
         return app.wsgi_app(environ, start_response)

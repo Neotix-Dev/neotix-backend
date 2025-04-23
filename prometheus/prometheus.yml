@@ -1,0 +1,64 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'neotix-api-stable'
+    dns_sd_configs:
+      - names:
+          - 'tasks.neotix-api'
+        type: 'A'
+        port: 5000
+    metrics_path: '/metrics'
+    relabel_configs:
+      - source_labels: [__meta_dns_name]
+        target_label: instance
+      - source_labels: []
+        target_label: version
+        replacement: 'stable'
+
+  - job_name: 'neotix-api-canary'
+    dns_sd_configs:
+      - names:
+          - 'tasks.neotix-api-canary'
+        type: 'A'
+        port: 5000
+    metrics_path: '/metrics'
+    relabel_configs:
+      - source_labels: [__meta_dns_name]
+        target_label: instance
+      - source_labels: []
+        target_label: version
+        replacement: 'canary'
+
+  - job_name: 'gcp-deployment-api-stable'
+    dns_sd_configs:
+      - names:
+          - 'tasks.gcp-deployment-api'
+        type: 'A'
+        port: 5001
+    metrics_path: '/metrics'
+    relabel_configs:
+      - source_labels: [__meta_dns_name]
+        target_label: instance
+      - source_labels: []
+        target_label: version
+        replacement: 'stable'
+
+  - job_name: 'gcp-deployment-api-canary'
+    dns_sd_configs:
+      - names:
+          - 'tasks.gcp-deployment-api-canary'
+        type: 'A'
+        port: 5001
+    metrics_path: '/metrics'
+    relabel_configs:
+      - source_labels: [__meta_dns_name]
+        target_label: instance
+      - source_labels: []
+        target_label: version
+        replacement: 'canary'
