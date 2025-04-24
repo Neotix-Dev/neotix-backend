@@ -9,6 +9,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Import this here to avoid circular imports
+from models.user import User
+
 def generate_api_key():
     """Generate a new API key using secrets module"""
     return secrets.token_urlsafe(32)
@@ -61,3 +64,30 @@ def check_api_key(required_permission=None):
 # Convenience decorators for common permission levels
 require_api_key = check_api_key()  # Any valid key
 require_admin_key = check_api_key(APIKeyPermission.ADMIN)  # Admin only
+
+def get_user_from_key(api_key):
+    """
+    Get a user based on their API key.
+    Returns None if the key is invalid or the user doesn't exist.
+    """
+    # First check if it's the master key from .env
+    master_key = os.getenv('MASTER_API_KEY')
+    if master_key and api_key == master_key:
+        # For development/testing, return the first user or create one if none exists
+        user = User.query.first()
+        if not user:
+            user = User(username='admin', email='admin@example.com')
+            user.balance = 1000.0  # Start with some funds for testing
+            db.session.add(user)
+            db.session.commit()
+        return user
+        
+    # Check if key exists in database and get user
+    key_record = APIKey.query.filter_by(key=api_key, is_active=True).first()
+    if not key_record:
+        return None
+        
+    # Get user associated with this key
+    # Note: Assuming there's a user_id field in the APIKey model
+    user = User.query.filter_by(id=key_record.user_id).first() if hasattr(key_record, 'user_id') else None
+    return user

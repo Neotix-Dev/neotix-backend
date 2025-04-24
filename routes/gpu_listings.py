@@ -126,9 +126,16 @@ def search_gpus():
 def get_gpu(id):
     try:
         logger.info(f"Starting get_gpu request for id {id}")
-        listing = GPUListing.query.join(GPUConfiguration).get_or_404(id)
+        # Use filter_by().first() instead of join().get_or_404() to avoid SQLAlchemy error
+        listing = GPUListing.query.filter_by(id=id).first()
+        if not listing:
+            return jsonify({"error": f"GPU listing with id {id} not found"}), 404
+            
         logger.info(f"Found GPU listing with id {id}")
-        return jsonify(listing.to_dict())
+        result = listing.to_dict()
+        # Add price points if available
+        result['price_points'] = [pp.to_dict() for pp in listing.price_points]
+        return jsonify(result)
     except Exception as e:
         logger.error(f"Error in get_gpu: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
