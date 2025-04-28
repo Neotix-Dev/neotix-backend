@@ -189,24 +189,56 @@ class GPUListing(db.Model):
             config.gpu_name, config.gpu_vendor, config.gpu_memory, config.gpu_count
         )
 
+    # Property getters for direct access to configuration attributes
+    @property
+    def gpu_name(self):
+        return self.configuration.gpu_name if self.configuration else None
+        
+    @property
+    def gpu_vendor(self):
+        return self.configuration.gpu_vendor if self.configuration else None
+        
+    @property
+    def gpu_count(self):
+        return self.configuration.gpu_count if self.configuration else None
+        
+    @property
+    def gpu_memory(self):
+        return self.configuration.gpu_memory if self.configuration else None
+        
+    @property
+    def gpu_score(self):
+        return self.configuration.gpu_score if self.configuration else None
+        
+    @property
+    def cpu(self):
+        return self.configuration.cpu if self.configuration else None
+        
+    @property
+    def memory(self):
+        return self.configuration.memory if self.configuration else None
+        
+    @property
+    def disk_size(self):
+        return self.configuration.disk_size if self.configuration else None
+    
     def to_dict(self):
         """Convert GPU listing to dictionary representation"""
-        config = self.configuration
         host = self.host
         
         return {
             "id": self.id,
             "instance_name": self.instance_name,
-            "gpu_name": config.gpu_name if config else None,
-            "gpu_vendor": config.gpu_vendor if config else None,
-            "gpu_count": config.gpu_count if config else None,
-            "gpu_memory": config.gpu_memory if config else None,
+            "gpu_name": self.gpu_name,
+            "gpu_vendor": self.gpu_vendor,
+            "gpu_count": self.gpu_count,
+            "gpu_memory": self.gpu_memory,
             "current_price": self.current_price,
-            "gpu_score": config.gpu_score if config else None,
+            "gpu_score": self.gpu_score,
             "price_change": self.price_change,
-            "cpu": config.cpu if config else None,
-            "memory": config.memory if config else None,
-            "disk_size": config.disk_size if config else None,
+            "cpu": self.cpu,
+            "memory": self.memory,
+            "disk_size": self.disk_size,
             "provider": host.name if host else None,
             "last_updated": self.last_updated.isoformat() if self.last_updated else None,
         }

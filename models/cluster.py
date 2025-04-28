@@ -43,8 +43,14 @@ class Cluster(db.Model):
             )
         ).first()
 
-    def deploy_current_gpu(self, ssh_keys=None, email_enabled=True, duration_hours=24, config=None):
-        """Deploy the current GPU, converting it to a rental"""
+    def deploy_current_gpu(self, ssh_keys=None, email_enabled=True, config=None):
+        """Deploy the current GPU, converting it to a rental
+        
+        Args:
+            ssh_keys: Optional SSH keys to use for the deployment
+            email_enabled: Whether to send email notifications
+            config: Additional configuration options
+        """
 
         if not self.current_gpu:
             raise ValueError("No GPU assigned to deploy")
@@ -82,12 +88,12 @@ class Cluster(db.Model):
         )
 
         rental_gpu.status = "active"
-        # Use UTC for both start and end time
+        # Use UTC for start time
         now = datetime.utcnow()
         rental_gpu.start_time = now.replace(tzinfo=None)  # Ensure no timezone info
-        rental_gpu.end_time = (now + timedelta(hours=duration_hours)).replace(
-            tzinfo=None
-        )  # Ensure no timezone info
+        
+        # On-demand deployment - no fixed end time
+        rental_gpu.end_time = None
 
         # Clear the current GPU since it's now a rental
         # self.current_gpu_id = None

@@ -1,9 +1,13 @@
 from flask import Blueprint, jsonify, request
 from datetime import datetime, timedelta
-from models.gpu_listing import GPUListing, Host, GPUPricePoint
+from models.gpu_listing import GPUListing, Host, GPUPricePoint, GPUConfiguration
 from models.api_key import APIKey, APIKeyPermission
+from models.user import User
+from models.transaction import Transaction
+from models.cluster import Cluster
+from models.rental_gpu import RentalGPU
 from utils.database import db
-from utils.api_auth import require_api_key, require_admin_key, generate_api_key
+from utils.api_auth import require_api_key, require_admin_key, generate_api_key, get_user_from_key
 from sqlalchemy import func, desc, and_
 from flask_cors import cross_origin
 import pytz
@@ -20,13 +24,21 @@ def get_current_est_time():
 def get_market_overview():
     """Get a high-level overview of the GPU market."""
     try:
-        total_gpus = db.session.query(func.sum(GPUListing.gpu_count)).scalar() or 0
+        # Use the actual configuration relationship and column
+        total_gpus = db.session.query(
+            func.sum(GPUConfiguration.gpu_count)
+        ).join(
+            GPUListing, GPUListing.configuration_id == GPUConfiguration.id
+        ).scalar() or 0
         
+        # Query vendor info using configuration relationship
         vendor_prices = db.session.query(
-            GPUListing.gpu_vendor,
+            GPUConfiguration.gpu_vendor,
             func.avg(GPUListing.current_price).label('avg_price'),
             func.count().label('count')
-        ).group_by(GPUListing.gpu_vendor).all()
+        ).join(
+            GPUListing, GPUListing.configuration_id == GPUConfiguration.id
+        ).group_by(GPUConfiguration.gpu_vendor).all()
         
         response = {
             'timestamp': get_current_est_time().isoformat(),
@@ -57,13 +69,15 @@ def get_gpu_prices():
         min_memory = request.args.get('min_memory', type=float)
         max_price = request.args.get('max_price', type=float)
         location = request.args.get('location')
+        gpu_name = request.args.get('gpu_name')
         
-        query = db.session.query(GPUListing).join(Host)
-        
+        query = db.session.query(GPUListing).join(Host).join(GPUConfiguration)
+        if gpu_name:
+            query = query.filter(GPUConfiguration.gpu_name == gpu_name)
         if vendor:
-            query = query.filter(GPUListing.gpu_vendor == vendor)
+            query = query.filter(GPUConfiguration.gpu_vendor == vendor)
         if min_memory:
-            query = query.filter(GPUListing.gpu_memory >= min_memory)
+            query = query.filter(GPUConfiguration.gpu_memory >= min_memory)
         if max_price:
             query = query.filter(GPUListing.current_price <= max_price)
             
@@ -174,9 +188,9 @@ def get_provider_gpu_prices(provider):
 def get_gpu_model_prices(model):
     """Get price comparison for a specific GPU model across providers."""
     try:
-        listings = GPUListing.query.filter(
-            GPUListing.gpu_name.ilike(f'%{model}%')
-        ).join(Host).all()
+        listings = db.session.query(GPUListing).join(GPUConfiguration).join(Host).filter(
+            GPUConfiguration.gpu_name.ilike(f'%{model}%')
+        ).all()
         
         if not listings:
             return jsonify({
@@ -216,6 +230,171 @@ def get_gpu_model_prices(model):
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# GPU Listing Routes
+@bp.route('/gpu/filtered', methods=['GET'])
+@cross_origin()
+def get_gpu_listings():
+    """Get filtered GPU listings."""
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+        
+        # Build query with optional filters
+        query = GPUListing.query.join(GPUConfiguration, GPUListing.configuration_id == GPUConfiguration.id)
+        
+        # Apply filters
+        # Filter by GPU model(s)
+        models = request.args.getlist('gpuTypes[]')
+        if models:
+            query = query.filter(GPUConfiguration.gpu_name.in_(models))
+        # Filter by provider(s)
+        providers = request.args.getlist('provider[]')
+        if providers:
+            query = query.join(Host).filter(Host.name.in_(providers))
+        # Filter by vendor(s)
+        vendors = request.args.getlist('vendors[]')
+        if vendors:
+            query = query.filter(GPUConfiguration.gpu_vendor.in_(vendors))
+        # Filter by memory
+        min_memory = request.args.get('min_memory', type=float)
+        if min_memory is not None:
+            query = query.filter(GPUConfiguration.gpu_memory >= min_memory)
+        # Filter by price
+        max_price = request.args.get('max_price', type=float)
+        if max_price is not None:
+            query = query.filter(GPUListing.current_price <= max_price)
+            
+        # Handle pagination
+        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+        
+        result = {
+            'gpus': [listing.to_dict() for listing in paginated.items],
+            'page': page,
+            'pages': paginated.pages,
+            'total': paginated.total
+        }
+        
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/gpu/<int:gpu_id>', methods=['GET'])
+@cross_origin()
+def get_gpu_details(gpu_id):
+    """Get detailed information about a specific GPU listing."""
+    try:
+        # Use filter_by().first() instead of get() or get_or_404 to avoid the error with existing criterion
+        gpu_listing = GPUListing.query.filter_by(id=gpu_id).first()
+        if not gpu_listing:
+            return jsonify({'error': f'GPU listing with id {gpu_id} not found'}), 404
+            
+        result = gpu_listing.to_dict()
+        # Add price points if available
+        result['price_points'] = [pp.to_dict() for pp in gpu_listing.price_points]
+        
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# # Cluster Routes
+# @bp.route('/clusters/', methods=['GET'])
+# @cross_origin()
+# def get_user_clusters():
+#     """Get all clusters belonging to the authenticated user."""
+#     try:
+#         # Get the authorization header
+#         auth_header = request.headers.get('X-API-Key')
+#         if not auth_header:
+#             return jsonify({'error': 'No authorization header'}), 401
+            
+#         # Get user from API key
+#         user = get_user_from_key(auth_header)
+#         if not user:
+#             return jsonify({'error': 'Invalid API key'}), 401
+            
+#         # Get user's clusters
+#         clusters = Cluster.query.filter_by(user_id=user.id).all()
+#         result = [cluster.to_dict() for cluster in clusters]
+        
+#         return jsonify(result), 200
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+
+# @bp.route('/clusters-status/', methods=['GET'])
+# @cross_origin()
+# def get_clusters_status():
+#     """Get status of all clusters for the authenticated user."""
+#     try:
+#         # Get the authorization header
+#         auth_header = request.headers.get('X-API-Key')
+#         if not auth_header:
+#             return jsonify({'error': 'No authorization header'}), 401
+            
+#         # Get user from API key
+#         user = get_user_from_key(auth_header)
+#         if not user:
+#             return jsonify({'error': 'Invalid API key'}), 401
+            
+#         # Get user's clusters with status
+#         clusters = Cluster.query.filter_by(user_id=user.id).all()
+#         result = [
+#             {
+#                 'id': cluster.id,
+#                 'name': cluster.name,
+#                 'status': cluster.status,
+#                 'created_at': cluster.created_at.isoformat() if cluster.created_at else None,
+#                 'gpus': [{
+#                     'id': gpu.id,
+#                     'status': gpu.status,
+#                     'start_time': gpu.start_time.isoformat() if gpu.start_time else None,
+#                     'is_active': gpu.is_active
+#                 } for gpu in cluster.gpus]
+#             } for cluster in clusters
+#         ]
+        
+#         return jsonify(result), 200
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+
+# # User Routes
+# @bp.route('/user/balance', methods=['GET'])
+# @cross_origin()
+# def get_user_balance():
+#     """Get the current balance for the authenticated user."""
+#     try:
+#         # Get the authorization header
+#         auth_header = request.headers.get('X-API-Key')
+#         if not auth_header:
+#             return jsonify({'error': 'No authorization header'}), 401
+            
+#         # Get user from API key
+#         user = get_user_from_key(auth_header)
+#         if not user:
+#             return jsonify({'error': 'Invalid API key'}), 401
+            
+#         # Get current month's transactions for usage calculation
+#         now = datetime.now()
+#         start_of_month = datetime(now.year, now.month, 1, tzinfo=now.tzinfo)
+        
+#         # Calculate total spent this month
+#         monthly_transactions = Transaction.query.filter(
+#             Transaction.user_id == user.id,
+#             Transaction.created_at >= start_of_month,
+#             Transaction.amount < 0  # Negative amounts are expenses
+#         ).all()
+        
+#         monthly_usage = sum(abs(t.amount) for t in monthly_transactions)
+        
+#         result = {
+#             'balance': user.balance,
+#             'currency': 'USD',
+#             'monthly_usage': monthly_usage
+#         }
+        
+#         return jsonify(result), 200
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
 
 # API Key Management Routes
 @bp.route('/v1/keys', methods=['POST'])

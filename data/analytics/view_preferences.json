@@ -1,12 +1,12 @@
 [
   {
     "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
-    "timestamp": 1743861770841,
+    "timestamp": 1745607698896,
     "viewType": "table",
     "initialView": "table",
-    "recorded_at": "2025-04-05T14:02:50.851814"
-  },
-  {
+    "recorded_at": "2025-04-25T19:01:38.908573"
+  }
+]  {
     "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
     "timestamp": 1743863448635,
     "viewType": "table",
@@ -54,5 +54,33 @@
     "viewType": "table",
     "initialView": "table",
     "recorded_at": "2025-04-05T15:24:50.904609"
+  },
+  {
+    "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
+    "timestamp": 1745503221483,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-24T14:00:21.511632"
+  },
+  {
+    "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
+    "timestamp": 1745607381780,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-25T18:56:22.099764"
+  },
+  {
+    "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
+    "timestamp": 1745607606780,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-25T19:00:06.813067"
+  },
+  {
+    "sessionId": "05970275-9340-4a96-a9a5-36d5543bcc34",
+    "timestamp": 1745607698896,
+    "viewType": "table",
+    "initialView": "table",
+    "recorded_at": "2025-04-25T19:01:38.908347"
   }
 ]
