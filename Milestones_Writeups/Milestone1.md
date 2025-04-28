@@ -1,3 +1,6 @@
+
+## Milestone 1 Report
+
 ### A/B Testing (`/api/analytics`)
 
 The backend implements A/B testing functionality to track and analyze user preferences between different view types (grid vs. table view).
