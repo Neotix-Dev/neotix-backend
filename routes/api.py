@@ -69,13 +69,15 @@ def get_gpu_prices():
         min_memory = request.args.get('min_memory', type=float)
         max_price = request.args.get('max_price', type=float)
         location = request.args.get('location')
+        gpu_name = request.args.get('gpu_name')
         
-        query = db.session.query(GPUListing).join(Host)
-        
+        query = db.session.query(GPUListing).join(Host).join(GPUConfiguration)
+        if gpu_name:
+            query = query.filter(GPUConfiguration.gpu_name == gpu_name)
         if vendor:
-            query = query.filter(GPUListing.gpu_vendor == vendor)
+            query = query.filter(GPUConfiguration.gpu_vendor == vendor)
         if min_memory:
-            query = query.filter(GPUListing.gpu_memory >= min_memory)
+            query = query.filter(GPUConfiguration.gpu_memory >= min_memory)
         if max_price:
             query = query.filter(GPUListing.current_price <= max_price)
             
@@ -186,9 +188,9 @@ def get_provider_gpu_prices(provider):
 def get_gpu_model_prices(model):
     """Get price comparison for a specific GPU model across providers."""
     try:
-        listings = GPUListing.query.filter(
-            GPUListing.gpu_name.ilike(f'%{model}%')
-        ).join(Host).all()
+        listings = db.session.query(GPUListing).join(GPUConfiguration).join(Host).filter(
+            GPUConfiguration.gpu_name.ilike(f'%{model}%')
+        ).all()
         
         if not listings:
             return jsonify({
@@ -242,16 +244,25 @@ def get_gpu_listings():
         query = GPUListing.query.join(GPUConfiguration, GPUListing.configuration_id == GPUConfiguration.id)
         
         # Apply filters
-        vendor = request.args.get('vendor')
-        if vendor:
-            query = query.filter(GPUConfiguration.gpu_vendor == vendor)
-            
+        # Filter by GPU model(s)
+        models = request.args.getlist('gpuTypes[]')
+        if models:
+            query = query.filter(GPUConfiguration.gpu_name.in_(models))
+        # Filter by provider(s)
+        providers = request.args.getlist('provider[]')
+        if providers:
+            query = query.join(Host).filter(Host.name.in_(providers))
+        # Filter by vendor(s)
+        vendors = request.args.getlist('vendors[]')
+        if vendors:
+            query = query.filter(GPUConfiguration.gpu_vendor.in_(vendors))
+        # Filter by memory
         min_memory = request.args.get('min_memory', type=float)
-        if min_memory:
+        if min_memory is not None:
             query = query.filter(GPUConfiguration.gpu_memory >= min_memory)
-            
+        # Filter by price
         max_price = request.args.get('max_price', type=float)
-        if max_price:
+        if max_price is not None:
             query = query.filter(GPUListing.current_price <= max_price)
             
         # Handle pagination
