@@ -1,13 +1,13 @@
 {
   "type": "service_account",
-  "project_id": "ne0tix",
-  "private_key_id": "5e47397732dc23da48dc500db1d2e29f23055625",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDHFumrXm+9fHSi\nRzcCLNX6tSfRERq8Xkzt5Cqa0qEi8CDewiG89jLPYmzqk1M8aoEDcpyhF3ReZLBq\nHG+GKLXrCtQwXdUSEdVhRdrCVCV38Ejs7qk7zGskK1LPtexuyTE1/LB+/liIgs2h\nyQKGQ/5OTUIuyizT32p3mUjCarzk/TEU+M8bCd9vYejtvBmFDiwGDeGAIBvEacxQ\n4MMaKkFLr+IaJ02OQl/CAtdm3iBcBXNq3UMivCn0o/XGuDS1KAYlGDdnW25cWcsH\n+knTY0tcsOcHZznLpi5Djiqae82orHhc9pT0wIVT+a8aN1Mq6TLtqF5AWi2o5Hkx\n3mt4GxPBAgMBAAECggEAEPng8GojzIxDdL/uTprsnw1Z6Q+UkEnZNPK++EcsEsrX\nfq8eidqTcBAUOfdYgl8Rg63+8ZSKqW7cBRxKHS40/ucEO2CQ5dLL91ipw+bBcCX2\nze820oDGhQXFsKzyTWsN7WzPzvBYs8E1kA1QEAtVsK8RTOST6HgVP7/8Donj9AGF\nawbE3L5Q8weScashHCe3e2WfyL6HYLzK3261DVwKylx8vlkx+nrEbe7/RZQQRJnJ\nxVMt3K1lKAKfMjoMq8ocGnnj1lH5EACjux07E1ec/iaRyRUDbJ6VIOi8Xg0jKm/7\nhTaY0E49nNnr34t65uULeINzg2VjrJ2104rFMn+ubQKBgQDpta2BIMy/UhwhGBDb\nNp3952ImgxynTkLdHN3V0FZrbx/L50b9TQ80Bm1aL44rTXKRURDQ+cIrGzAMLmcv\n/ElorbsuYXbsccDlxtyhn/EvdvKwNO4pAcj80FEANS89Yz7RuHLi58MiHOp3hjn0\nj6WqBt6ZFp5PSKEvLTszmlmT9QKBgQDaE/BdVbm1n6jS69OLNYOKS+04NKW4o1vx\nhIret7X7qNpi6nD6ry3uAWcBS6MEwDxC+SBrV0SDhUw7MLR6PqJyssSzh/reS1EQ\nyRgmrh4LARPZIggqYQbP39a1nKBaMEewAHwis/dbFFtDd6mnSlqGu/tewseJH2Of\nWfGN9F5tHQKBgDTmLHmX5QBBI6DSA666tBQudWbmMmwkKLpHuGaXG5iBtJ7AoK7g\n7FoIQmQxc2qVwyLlSHskrTB4nO2E61JPNoZ9HGspIHPwY4se8f2baEooEFKWCHo7\nrzSaKltzrlekySlLKKX3c5GbHe8j8KZMhWDw4R2hov+rHuDAyi+p9jCpAoGBAJ++\n8Vj9fd8ciGeRFlIoLiY1Phzo++hHygceJzfEbQtfAjJpN796aXOqFVEuncjSJJKO\nuX/H2klZcKD/KYVOsmLArzQvzMXfeA+KryVOcHVxIZ/xvPeGQZ4ugrJgfFn0ed7k\nTAqDuBNA0yWV13HTFoMR2q3skovQsYI+OaLZuf3FAoGBAKc04zvgOfVUZ+a1bbCP\nPEGem2sJnVmNLTJhYX4kR9Ws3yr5X5HK/18r9HhACrb+iOHYSO0Xp4E+2G6VcCMZ\nhl3SQIW6JIMQ3R70fUyABFC3GF73YomUyqocGMULBP0CTLIWTMnEim9DKQScZRAH\nTccYgLNneuH+WQdA/8CxNkUK\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk-kewhz@ne0tix.iam.gserviceaccount.com",
-  "client_id": "104607973464664299808",
+  "project_id": "your-project-id",  // <-- REPLACE with your actual Firebase project ID
+  "private_key_id": "fake-private-key-id-1234567890",  // <-- FAKE VALUE
+  "private_key": "-----BEGIN PRIVATE KEY-----\nFAKE_KEY_DO_NOT_USE\n-----END PRIVATE KEY-----\n",  // <-- FAKE VALUE
+  "client_email": "firebase-adminsdk-abcde@your-project-id.iam.gserviceaccount.com",  // <-- FAKE VALUE
+  "client_id": "000000000000000000000",  // <-- FAKE VALUE
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
   "token_uri": "https://oauth2.googleapis.com/token",
   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-kewhz%40ne0tix.iam.gserviceaccount.com",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-abcde%40your-project-id.iam.gserviceaccount.com",
   "universe_domain": "googleapis.com"
 }
