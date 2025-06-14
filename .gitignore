@@ -10,6 +10,7 @@ dist-ssr
 
 # Database files
 **/*.db
+.env
 
 # Models
 embeddings_model/
